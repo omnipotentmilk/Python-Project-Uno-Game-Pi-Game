@@ -44,11 +44,53 @@ def deck_builder(variable_player_count):
 # store the player decks and the uno deck as a variable to be easily accessible
 if variable_player_count == 2:
     player1_deck, player2_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
+    player3_deck = [0]
+    player4_deck = [0]
 elif variable_player_count == 3:
     player1_deck, player2_deck, player3_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
+    player4_deck = [0]
 elif variable_player_count == 4:
     player1_deck, player2_deck, player3_deck, player4_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
 
-print(player1_deck)
+playerX_deck = player1_deck
+
+# takes a players deck and prints its contents
+def card_reader(playerX_deck):
+    card_info = [
+        "Red 1", "Red 2", "Red 3", "Red 4", "Red 5", "Red 6", "Red 7", "Red 8", "Red 9",
+        "Yellow 1", "Yellow 2", "Yellow 3", "Yellow 4", "Yellow 5", "Yellow 6", "Yellow 7", "Yellow 8", "Yellow 9",
+        "Green 1", "Green 2", "Green 3", "Green 4", "Green 5", "Green 6", "Green 7", "Green 8", "Green 9",
+        "Blue 1", "Blue 2", "Blue 3", "Blue 4", "Blue 5", "Blue 6", "Blue 7", "Blue 8", "Blue 9",
+        "Red Special Skip", "Red Special Reverse", "Red Special +2",
+        "Yellow Special Skip", "Yellow Special Reverse", "Yellow Special +2",
+        "Green Special Skip", "Green Special Reverse", "Green Special +2",
+        "Blue Special Skip", "Blue Special Reverse", "Blue Special +2",
+        "Wild Card Color Change", "Wild Card Color Change", "Wild Card +4 Color Change", "Wild Card +4 Color Change"
+    ]
+    # creates an empty list to be used later
+    output = []
+
+    # iterates through each value (n) of the player list, and appends to a new list. this new list rather than having
+    # number values has the string values associated with its position in the card_info list.
+    #  if playerX_deck[0] has value 12, it will be "Yellow 4" for example.
+    for n in playerX_deck:
+        output.append(card_info[n])
+    print(output)
+    return
+
+def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
+    if len(player1_deck) == 0:
+        return True, 0
+    elif len(player2_deck) == 0:
+        return True, 1
+    elif len(player3_deck) == 0:
+        return True, 2
+    elif len(player4_deck) == 0:
+        return True, 3
+    else:
+        return False, 4
+
+
+card_reader(player1_deck)
 
 
