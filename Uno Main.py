@@ -20,35 +20,35 @@ def deck_builder(variable_player_count):
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
 
-    # Initialize a list to store 2-4 lists of length 7
+    # Initialize a empty list which will be used to help create the player deck
     players_deck_temp = []
 
-    # Depending on the number of players, slice the original uno deck 7 cards at a time and append that 7 length list
-    # to a new list
+    # Depending on the number of players, slice the original uno deck 7 cards at a time and append resulting list
+    # to temp deck for later
     for _ in range(variable_player_count):
         player_deck = uno_deck_instance[:7]
         uno_deck_instance = uno_deck_instance[7:]
         players_deck_temp.append(player_deck)
 
-    # Use unpacking to assign each player with a deck (and then the game itself a deck) then return
-    # (depending on player count)
+    # Use unpacking to return each players deck
     if variable_player_count == 2:
         player1_deck, player2_deck = players_deck_temp
-        return player1_deck, player2_deck, uno_deck_instance
+        return player1_deck, player2_deck, uno_deck_instance, players_deck_temp
     elif variable_player_count == 3:
         player1_deck, player2_deck, player3_deck = players_deck_temp
-        return player1_deck, player2_deck, player3_deck, uno_deck_instance
+        return player1_deck, player2_deck, player3_deck, uno_deck_instance, players_deck_temp
     elif variable_player_count == 4:
         player1_deck, player2_deck, player3_deck, player4_deck = players_deck_temp
-        return player1_deck, player2_deck, player3_deck, player4_deck, uno_deck_instance
+        return player1_deck, player2_deck, player3_deck, player4_deck, uno_deck_instance, players_deck_temp
 
-# store the player decks and the uno deck as a variable to be used in the game later.
+# store the player decks and the uno deck as a variable to be easily accessible
 if variable_player_count == 2:
-    player1_deck, player2_deck, game1_deck = deck_builder(variable_player_count)
+    player1_deck, player2_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
 elif variable_player_count == 3:
-    player1_deck, player2_deck, player3_deck, game1_deck = deck_builder(variable_player_count)
+    player1_deck, player2_deck, player3_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
 elif variable_player_count == 4:
-    player1_deck, player2_deck, player3_deck, player4_deck, game1_deck = deck_builder(variable_player_count)
+    player1_deck, player2_deck, player3_deck, player4_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
 
-print(player4_deck, player3_deck, player2_deck, player1_deck, game1_deck)
+print(player1_deck)
+
 
