@@ -107,7 +107,7 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 
 
 # this will be the function that controls player actions. when given input deck and current deck will allow player to
-# do specific tasks
+# do specific tasks (Draw a card, Play a card)
 def player_card_turn(input_deck, remaining_deck):
     remaining_deck_instance = remaining_deck
     print(f"Current Cards: {card_reader(input_deck)}")
@@ -122,10 +122,19 @@ def player_card_turn(input_deck, remaining_deck):
                     print("SUccesffully chose 0")
                     break
                 elif player_selection == 1:
-                    print("SUccesffully chose 1")
+                    if cards_drawn < 1:
+                        input_deck.append(remaining_deck_instance[-1])
+                        remaining_deck_instance.pop()
+                        print(f"Current Cards: {card_reader(input_deck)}")
+                        print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
+                        continue
+                    else:
+                        print("Cannot draw another card.")
+                        continue
                     break
                 elif player_selection == 2:
-                    print("SUccesffully chose 2")
+                    if (cards_drawn > 1) or (cards_played > 1):
+                        break # The user has successfully compeleted all requirements for a turn
                     break
             else:
                 print("Invalid input. Please enter a number between 0 and 2.")
@@ -140,18 +149,11 @@ def player_card_turn(input_deck, remaining_deck):
 # located seperately and called by this master function
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
-    player_count = variable_player_count
-    ####### remove later #########################
-    # player_count variable currently has NO USE #
-    ##############################################
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
         if len(current_player) == 2:
             print("Player 1 Turn")
             card_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
-            ############## remove later #############################################################################
-            # sidenote i might make all this into its own function and just call it here because its very repetitive
-            ########### remove later ################################################################################
         elif len(current_player) == 3:
             print("Player 1 Turn")
             card_reader(player1_deck)
