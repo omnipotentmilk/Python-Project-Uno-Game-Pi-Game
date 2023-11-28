@@ -123,8 +123,10 @@ def player_card_turn(input_deck, remaining_deck):
                     break
                 elif player_selection == 1:
                     if cards_drawn < 1:
+                        cards_draw += 1
                         input_deck.append(remaining_deck_instance[-1])
                         remaining_deck_instance.pop()
+                        print("\nYou drew a card!")
                         print(f"Current Cards: {card_reader(input_deck)}")
                         print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
                         continue
