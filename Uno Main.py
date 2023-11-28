@@ -6,6 +6,7 @@ import random
 ################################## Remove later ##################
 
 
+
 # asks the user to specify how many players will be playing
 def game_initialize():
     while True:
@@ -112,6 +113,10 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 
 
 
+def played_card_validator():
+    pass
+
+
 # Holds all of the logic associated with a player turn other than checking if a played card is valid.
 def player_card_turn(input_deck, remaining_deck):
     remaining_deck_instance = remaining_deck
@@ -119,6 +124,7 @@ def player_card_turn(input_deck, remaining_deck):
     print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
     cards_drawn = 0
     cards_played = 0
+    selected_card = -1
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
@@ -126,7 +132,16 @@ def player_card_turn(input_deck, remaining_deck):
                 if player_selection == 0:
                     if cards_played < 1:
                         cards_played += 1
-                        print("TEST Successfully able to play a card TEST")
+                        while True:
+                            try:
+                                ############ remove later ################
+                                # add card selection, call played card validator.
+                                # after, figure out how to implement the reverse card and skip turn card :skull:
+                                ######### remove later ##############
+                                break
+                            except ValueError:
+                                print("Invalid input. Please enter a valid number.")
+                        break
                     else:
                         print("Cannot play another card.")
                         continue
@@ -157,16 +172,16 @@ def player_card_turn(input_deck, remaining_deck):
 
 
 
-# this will be the game loop which will act as the central location for the game to function
-# specific things (such as reading player decks, checking if a player has won, and card-play logic) will be
-# located seperately and called by this master function
+# master function for the game logic (Calls most other functions and requires all previous variables)
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
-        ############## remove later ##############################################################
-        # I might replace this with a function because im literally doing the same thing 3 times. i cld just call
-        # a function instead
-        ######################## remove later ########################################################
+
+        ############## remove later ###############################################################################
+        # I might replace this with a function because im literally doing the same thing 3 times. i cld just call #
+        # a function instead                                                                                      #
+        ######################## remove later #####################################################################
+
         if len(current_player) == 2:
             print("Player 1 Turn")
             card_reader(player1_deck)
