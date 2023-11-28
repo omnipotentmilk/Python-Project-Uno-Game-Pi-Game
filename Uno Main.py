@@ -45,6 +45,8 @@ def deck_builder(variable_player_count):
 
 
 # store the player decks and the uno deck as a variable(s) to be easily accessible
+# Unused players are given a deck of [-1] so it is very obvious when debugging if a player that should not be
+# included in the game has somehow gotten into a turn
 if variable_player_count == 2:
     player1_deck, player2_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count)
     player3_deck = [-1]
@@ -58,6 +60,8 @@ elif variable_player_count == 4:
 
 
 # takes a players deck and prints its contents
+# this is neccessary because the game logic only works with numbers (ex: Game will be working with the list [0, 1]
+# But the player will be looking at what those numbers represent [Red 0, Red1] )
 def card_reader(input_deck):
     card_info = [
         "Red 0", "Red 1", "Red 2", "Red 3", "Red 4", "Red 5", "Red 6", "Red 7", "Red 8", "Red 9",
@@ -107,12 +111,24 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 def player_card_turn(input_deck, remaining_deck):
     remaining_deck_instance = remaining_deck
     print(f"Current Cards: {card_reader(input_deck)}")
-    print(f"Top Deck Card: {card_reader(remaining_deck_instance[0])}")
+    print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
+    cards_drawn = 0
+    while True:
+        try:
+            player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn"))
+            if sum(player_selection, cards_drawn)
+                return player_count
+            else:
+                print("Invalid input. Please enter a number between 2 and 4.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
     return
 
 
 
-# this will be the game loop which will control the flow of the game (turn logic)
+# this will be the game loop which will act as the central location for the game to function
+# specific things (such as reading player decks, checking if a player has won, and card-play logic) will be
+# located seperately and called by this master function
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
     player_count = variable_player_count
@@ -125,3 +141,5 @@ def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_p
     return
 
 game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck)
+# this giant mess of a function call just calls the master function with every possible input it would need to control
+# eerything else and successfully control the game
