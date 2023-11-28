@@ -117,8 +117,13 @@ def player_card_turn(input_deck, remaining_deck):
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
-            if (player_selection < 2):
-                print("VALID SELECTION TEST")
+            if (player_selection < 2 and player_selection > 0):
+                if player_selection == 0:
+                    break
+                elif player_selection == 1:
+                    break
+                elif player_selection == 2:
+                    break
             else:
                 print("Invalid input. Please enter a number between 0 and 2.")
         except ValueError:
@@ -132,10 +137,22 @@ def player_card_turn(input_deck, remaining_deck):
 # located seperately and called by this master function
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
-    player_count = variable_player_count
+    player_count = variable_player_count # currently unused variable, may be able to be clever and use the player list as
+    # both a current player tracker and a total player lenght tracker by doing the same trick as you did with
+    # the avagadro sequence (replace first index, append to end)
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
-        if len(current_player) == 2: # game instance for TWO PLAYERS ONLY ( Dont make slides about this because
-            # i might change it to find a way to dynamically handle player count. fow now im just doing it like this
+        if len(current_player) == 2:
+            print("Player 1 Turn")
+            card_reader(player1_deck)
+            player_card_turn(player1_deck, remaining_deck)
+            ############## remove later #############################################################################
+            # sidenote i might make all this into its own function and just call it here because its very repetitive
+            ########### remove later ################################################################################
+        elif len(current_player == 3:)
+            print("Player 1 Turn")
+            card_reader(player1_deck)
+            player_card_turn(player1_deck, remaining_deck)
+        elif len(current_player == 4:)
             print("Player 1 Turn")
             card_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
