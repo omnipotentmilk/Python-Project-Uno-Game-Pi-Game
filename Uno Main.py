@@ -113,13 +113,14 @@ def player_card_turn(input_deck, remaining_deck):
     print(f"Current Cards: {card_reader(input_deck)}")
     print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
     cards_drawn = 0
+    cards_played = 0
     while True:
         try:
-            player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn"))
-            if sum(player_selection, cards_drawn)
-                return player_count
+            player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
+            if (player_selection < 2):
+                print("VALID SELECTION TEST")
             else:
-                print("Invalid input. Please enter a number between 2 and 4.")
+                print("Invalid input. Please enter a number between 0 and 2.")
         except ValueError:
             print("Invalid input. Please enter a valid number.")
     return
@@ -133,7 +134,8 @@ def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_p
     current_player = list(range(variable_player_count))
     player_count = variable_player_count
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
-        if len(current_player) == 2:
+        if len(current_player) == 2: # game instance for TWO PLAYERS ONLY ( Dont make slides about this because
+            # i might change it to find a way to dynamically handle player count. fow now im just doing it like this
             print("Player 1 Turn")
             card_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
