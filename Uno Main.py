@@ -1,5 +1,12 @@
+# pretty much only used during initializing when shuffling the deck
 import random
 
+################# Remove later ###################################
+# Perhaps we could import a color module and color all the cards #
+################################## Remove later ##################
+
+
+# asks the user to specify how many players will be playing
 def game_initialize():
     while True:
         try:
@@ -11,11 +18,12 @@ def game_initialize():
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
-# store the player count to be used for other operations later
+# stores the output of our initialize as a variable
 variable_player_count = game_initialize()
 
 
 
+# creates the player decks (depending on player count) and the remaining decks
 def deck_builder(variable_player_count):
     # create & shuffle the initial UNO deck
     uno_deck_instance = list(range(56))
@@ -44,7 +52,7 @@ def deck_builder(variable_player_count):
 
 
 
-# store the player decks and the uno deck as a variable(s) to be easily accessible
+# this stores the player decks and the uno deck as a variable(s) to be easily accessible
 # Unused players are given a deck of [-1] so it is very obvious when debugging if a player that should not be
 # included in the game has somehow gotten into a turn
 if variable_player_count == 2:
@@ -74,24 +82,22 @@ def card_reader(input_deck):
         "Blue Special Skip", "Blue Special Reverse", "Blue Special +2",
         "Wild Card Color Change", "Wild Card Color Change", "Wild Card +4 Color Change", "Wild Card +4 Color Change"
     ]
+
     # creates an empty list to be used later
     output = []
 
-    # iterates through each value (n) of the player list, and appends to a new list. this new list rather than having
-    # number values has the string values associated with its position in the card_info list.
-    #  if playerX_deck[0] has value 12, it will be "Yellow 1" for example.
+    # responsible for doing the conversion from integer -> string
     for n in input_deck:
         if 0 <= n < len(card_info):
             output.append(card_info[n])
         else:
-            output.append(f"Invalid Card, cards number was:{n}") # this was added to debug if any card number
+            output.append(f"Invalid Card, cards number was:{n}") # added to debug if any card number
                                                                  # is messed up because i was having that issue
     return output
 
 
 
-# self explanatory checks if length of any deck is 0. if it is that means that player has won
-# true false and 0-4 is simply for future use, unimplemented yet
+# Checks to make sure no player has won the game!
 def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
     if len(player1_deck) == 0:
         return 0
@@ -106,8 +112,7 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 
 
 
-# this will be the function that controls player actions. when given input deck and current deck will allow player to
-# do specific tasks (Draw a card, Play a card)
+# Holds all of the logic associated with a player turn other than checking if a played card is valid.
 def player_card_turn(input_deck, remaining_deck):
     remaining_deck_instance = remaining_deck
     print(f"Current Cards: {card_reader(input_deck)}")
@@ -117,16 +122,20 @@ def player_card_turn(input_deck, remaining_deck):
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
-            if (player_selection < 3 and player_selection > 0):
+            if (player_selection < 3 and player_selection > -1): # only pass if valid action
                 if player_selection == 0:
-                    print("SUccesffully chose 0")
-                    break
+                    if cards_played < 1:
+                        cards_played += 1
+                        print("TEST Successfully able to play a card TEST")
+                    else:
+                        print("Cannot play another card.")
+                        continue
                 elif player_selection == 1:
                     if cards_drawn < 1:
-                        cards_draw += 1
+                        cards_drawn += 1
                         input_deck.append(remaining_deck_instance[-1])
                         remaining_deck_instance.pop()
-                        print("\nYou drew a card!")
+                        print("Drew a card!")
                         print(f"Current Cards: {card_reader(input_deck)}")
                         print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
                         continue
@@ -136,8 +145,10 @@ def player_card_turn(input_deck, remaining_deck):
                     break
                 elif player_selection == 2:
                     if (cards_drawn > 1) or (cards_played > 1):
-                        break # The user has successfully compeleted all requirements for a turn
-                    break
+                        break # The user has completed all requirements for a turn
+                    else:
+                        print("Cannot end turn.")
+                        continue
             else:
                 print("Invalid input. Please enter a number between 0 and 2.")
         except ValueError:
@@ -152,6 +163,10 @@ def player_card_turn(input_deck, remaining_deck):
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
+        ############## remove later ##############################################################
+        # I might replace this with a function because im literally doing the same thing 3 times. i cld just call
+        # a function instead
+        ######################## remove later ########################################################
         if len(current_player) == 2:
             print("Player 1 Turn")
             card_reader(player1_deck)
