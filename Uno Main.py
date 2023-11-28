@@ -82,8 +82,7 @@ def card_reader(input_deck):
         else:
             output.append(f"Invalid Card, cards number was:{n}") # this was added to debug if any card number
                                                                  # is messed up because i was having that issue
-    print(output)
-    return
+    return output
 
 
 
@@ -101,12 +100,27 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
     else:
         return False
 
+
+
+# this will be the function that controls player actions. when given input deck and current deck will allow player to
+# do specific tasks
+def player_card_turn(input_deck, remaining_deck):
+    remaining_deck_instance = remaining_deck
+    print(f"Current Cards: {card_reader(input_deck)}")
+    print(f"Top Deck Card: {card_reader(remaining_deck_instance[0])}")
+    return
+
+
+
+# this will be the game loop which will control the flow of the game (turn logic)
 def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
     current_player = list(range(variable_player_count))
-    remaining_deck_instance = remaining_deck
-    top_card = remaining_deck_instance[0]
-
+    player_count = variable_player_count
     while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
+        if len(current_player) == 2:
+            print("Player 1 Turn")
+            card_reader(player1_deck)
+            player_card_turn(player1_deck, remaining_deck)
         break
     return
 
