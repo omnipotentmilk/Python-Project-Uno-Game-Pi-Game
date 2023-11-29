@@ -120,9 +120,34 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
         return False
 
 
-
-def played_card_validator(input_card):
+# Makes sure the played card is accurate and can actually be played.
+def played_card_validator(input_card, top_card): # Inputted in integer form
     print(input_card)
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42):
+        print("red")
+    else:
+        print("GOD IS DEAD")
+
+    # 0 - 9 = red
+    # 10 - 19 = yellow
+    # 20 - 29 = green
+    # 30 - 39 = blue
+
+    # 40 - 42 = red
+    # 43 - 45 = yellow
+    # 46 - 48 = green
+    # 49 - 51 = blue
+
+    # 0, 10, 20, 30 = 0
+    # 1, 11, 21, 31 = 1
+    # 2, 12, 22, 32 = 2
+    # 3, 13, 23, 33 = 3
+    # 4, 14, 24, 34 = 4
+    # 5, 15, 25, 35 = 5
+    # 6, 16, 26, 36 = 6
+    # 7, 17, 27, 37 = 7
+    # 8, 18, 28, 38 = 8
+    # 9, 19, 29, 39 = 9
     return
 
 
@@ -134,6 +159,7 @@ def player_card_turn(input_deck, remaining_deck):
     cards_drawn = 0
     cards_played = 0
     selected_card = -1
+    print(input_deck)
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
@@ -141,16 +167,17 @@ def player_card_turn(input_deck, remaining_deck):
                 if player_selection == 0:
                     if cards_played < 1:
                         cards_played += 1
-                        try:
-                            selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) |  "))
-                            selected_card -= 1 # need to subtract one from slection because lists include 0
-                            valid_card = played_card_validator(input_deck[selected_card]) # passes selected card to validator function
-                            if valid_card == True:
-                                print("TEST SUCCESS CARD PLAYED")
-                            else:
-                                print("You cannot play this card")
-                        except ValueError:
-                            print("Invalid input. Please enter a valid number.")
+                        while True:
+                            try:
+                                selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) |  "))
+                                selected_card -= 1 # need to subtract one from slection because lists include 0
+                                valid_card = played_card_validator(input_deck[selected_card], remaining_deck_instance[0]) # passes selected card to validator function
+                                if valid_card == True:
+                                    print("TEST SUCCESS CARD PLAYED")
+                                else:
+                                    print("You cannot play this card.")
+                            except ValueError:
+                                print("Invalid input. Please enter a valid number.")
                     else:
                         print("Cannot play another card.")
                         continue
