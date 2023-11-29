@@ -59,30 +59,13 @@ def deck_builder(variable_player_count):
 # takes a players deck and prints its contents
 # this is neccessary because the game logic only works with numbers (ex: Game will be working with the list [0, 1]
 # But the player will be looking at what those numbers represent [Red 0, Red1] )
-def card_reader(input_deck):
-    card_info = [
-        "Red 0", "Red 1", "Red 2", "Red 3", "Red 4", "Red 5", "Red 6", "Red 7", "Red 8", "Red 9",
-        "Yellow 0", "Yellow 1", "Yellow 2", "Yellow 3", "Yellow 4", "Yellow 5", "Yellow 6", "Yellow 7", "Yellow 8", "Yellow 9",
-        "Green 0", "Green 1", "Green 2", "Green 3", "Green 4", "Green 5", "Green 6", "Green 7", "Green 8", "Green 9",
-        "Blue 0", "Blue 1", "Blue 2", "Blue 3", "Blue 4", "Blue 5", "Blue 6", "Blue 7", "Blue 8", "Blue 9",
-        "Red Special Skip", "Red Special Reverse", "Red Special +2",
-        "Yellow Special Skip", "Yellow Special Reverse", "Yellow Special +2",
-        "Green Special Skip", "Green Special Reverse", "Green Special +2",
-        "Blue Special Skip", "Blue Special Reverse", "Blue Special +2",
-        "Wild Card Color Change", "Wild Card Color Change", "Wild Card +4 Color Change", "Wild Card +4 Color Change"
-    ] # If the top deck card is a wild card, i dont know what to do, impleement a fix so the first player choses what card
-    # will be the wild card
-
-    # creates an empty list to be used later
+def deck_reader(input_deck):
     output = []
 
-    # responsible for doing the conversion from integer -> string
-    for n in input_deck:
-        if 0 <= n < len(card_info):
-            output.append(card_info[n])
-        else:
-            output.append(f"Invalid Card, cards number was:{n}") # added to debug if any card number
-                                                                 # is messed up because i was having that issue
+    for card in input_deck:
+        card_attributes = card_attribute_assigner(card)
+        output.append(card_attributes)
+
     return output
 
 
@@ -94,6 +77,9 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
     attributes = []
 
+    if input_card < 0:
+        attributes.append(f"Invalid {input_card}")
+
     if (0 <= input_card <= 9) or (40 <= input_card <= 42):
         attributes.append("red")
     elif (10 <= input_card <= 19) or (43 <= input_card <= 45):
@@ -102,6 +88,21 @@ def card_attribute_assigner(input_card): # Inputted in integer form
         attributes.append("green")
     elif (30 <= input_card <= 39) or (49 <= input_card <= 51):
         attributes.append("blue")
+
+    if (input_card in (55, 54, 53, 52)):
+        attributes.append("wild")
+
+    if input_card in (40, 43, 46, 49):
+        attributes.append("skip")
+
+    if input_card in (41, 44, 47, 50):
+        attributes.append("reverse")
+
+    if input_card in (42, 45, 48, 51):
+        attributes.append("+2")
+
+    if input_card in (54, 55):
+        attributes.append("+4")
 
     if (input_card in (0, 10, 20, 30)):
         attributes.append("0")
@@ -124,11 +125,7 @@ def card_attribute_assigner(input_card): # Inputted in integer form
     elif (input_card in (9, 19, 29, 39)):
         attributes.append("9")
 
-    if (input_card in (55, 54, 53, 52)):
-        attributes.append("wild")
-
     return attributes
-    # TODO implement WILD CARD attribute and special attributes ####
 
 
 
@@ -158,9 +155,10 @@ def player_card_turn(input_deck, remaining_deck):
     valid_card_placed = False
     while True:
         try:
+
             print("")
-            print(f"Current Cards: {card_reader(input_deck)}")
-            print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
+            print(f"Current Cards: {deck_reader(input_deck)}")
+            print(f"Top Deck Card: {deck_reader([remaining_deck_instance[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
             if (player_selection < 3 and player_selection > -1): # only pass if valid action
                 if player_selection == 0:
@@ -185,7 +183,7 @@ def player_card_turn(input_deck, remaining_deck):
                             # if comparison shows success, end action. if not, end action
                             if valid_card_placed == True:
                                 cards_played += 1
-                                print(f"Card {card_reader([int(input_deck[int(selected_card)])])} played!")
+                                print(f"Card {deck_reader([int(input_deck[int(selected_card)])])} played!")
                                 break
                             else:
                                 print("Cannot play this card.")
@@ -241,15 +239,15 @@ def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_p
         if len(current_player) == 2:
             print("")
             print("Player 1 Turn")
-            card_reader(player1_deck)
+            deck_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
         elif len(current_player) == 3:
             print("Player 1 Turn")
-            card_reader(player1_deck)
+            deck_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
         elif len(current_player) == 4:
             print("Player 1 Turn")
-            card_reader(player1_deck)
+            deck_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
         break
     return
