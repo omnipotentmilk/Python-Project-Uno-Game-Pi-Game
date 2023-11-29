@@ -106,6 +106,43 @@ def card_reader(input_deck):
 
 
 
+# Interprets inputted cards and returns what their attributes are for the purposes of comparison
+# NOT for user display, only for game logic
+def card_attribute_assigner(input_card): # Inputted in integer form
+    attributes = []
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42):
+        attributes.append("red")
+    elif (10 <= input_card <= 19) or (43 <= input_card <= 45):
+        attributes.append("yellow")
+    elif (20 <= input_card <= 29) or (46 <= input_card <= 48):
+        attributes.append("green")
+    elif (30 <= input_card <= 39) or (49 <= input_card <= 51):
+        attributes.append("blue")
+    if (input_card in (0, 10, 20, 30)):
+        attributes.append("0")
+    elif (input_card in (1, 11, 21, 31)):
+        attributes.append("1")
+    elif (input_card in (2, 12, 22, 32)):
+        attributes.append("2")
+    elif (input_card in (3, 13, 23, 33)):
+        attributes.append("3")
+    elif (input_card in (4, 14, 24, 34)):
+        attributes.append("4")
+    elif (input_card in (5, 15, 25, 35)):
+        attributes.append("5")
+    elif (input_card in (6, 16, 26, 36)):
+        attributes.append("6")
+    elif (input_card in (7, 17, 27, 37)):
+        attributes.append("7")
+    elif (input_card in (8, 18, 28, 38)):
+        attributes.append("8")
+    elif (input_card in (9, 19, 29, 39)):
+        attributes.append("9")
+    return attributes
+    # TODO implement WILD CARD attribute and special attributes ####
+
+
+
 # Checks to make sure no player has won the game!
 def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
     if len(player1_deck) == 0:
@@ -120,58 +157,6 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
         return False
 
 
-# attributes stuff to an input card in order to compare them
-def card_attribute_assigner(input_card): # Inputted in integer form
-    if (0 <= input_card <= 9) or (40 <= input_card <= 42):
-        print("red")
-    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
-        print("yellow")
-    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
-        print("greem")
-    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
-        print("blue")
-    elif (input_card in (0, 10, 20, 30)):
-        print("0")
-    elif (input_card in (1, 11, 21, 31)):
-        print("1")
-    elif (input_card in (2, 12, 22, 32)):
-        print("2")
-    elif (input_card in (3, 13, 23, 33)):
-        print("3")
-    elif (input_card in (4, 14, 24, 34)):
-        print("4")
-    elif (input_card in (5, 15, 25, 35)):
-        print("5")
-    elif (input_card in (6, 16, 26, 36)):
-        print("6")
-    elif (input_card in (7, 17, 27, 37)):
-        print("7")
-    elif (input_card in (8, 18, 28, 38)):
-        print("8")
-    elif (input_card in (9, 19, 29, 39)):
-        print("9")
-    # 0 - 9 = red
-    # 10 - 19 = yellow
-    # 20 - 29 = green
-    # 30 - 39 = blue
-
-    # 40 - 42 = red
-    # 43 - 45 = yellow
-    # 46 - 48 = green
-    # 49 - 51 = blue
-
-    # 0, 10, 20, 30 = 0
-    # 1, 11, 21, 31 = 1
-    # 2, 12, 22, 32 = 2
-    # 3, 13, 23, 33 = 3
-    # 4, 14, 24, 34 = 4
-    # 5, 15, 25, 35 = 5
-    # 6, 16, 26, 36 = 6
-    # 7, 17, 27, 37 = 7
-    # 8, 18, 28, 38 = 8
-    # 9, 19, 29, 39 = 9
-    return
-
 
 # Holds all of the logic associated with a player turn other than checking if a played card is valid.
 def player_card_turn(input_deck, remaining_deck):
@@ -180,22 +165,30 @@ def player_card_turn(input_deck, remaining_deck):
     print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
     cards_drawn = 0
     cards_played = 0
+    attribute_card_1 = -1
+    attribute_card_2 = -1
     selected_card = -1
-    print(input_deck)
+    print(input_deck) ########### remove later ##############
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
             if (player_selection < 3 and player_selection > -1): # only pass if valid action
                 if player_selection == 0:
                     if cards_played < 1:
-                        cards_played += 1
                         while True:
                             try:
                                 selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) |  "))
-                                selected_card -= 1 # need to subtract one from slection because lists include 0
-                                valid_card = played_card_validator(input_deck[selected_card], remaining_deck_instance[0]) # passes selected card to validator function
-                                if valid_card == True:
-                                    print("TEST SUCCESS CARD PLAYED")
+                                selected_card -= 1
+                                attribute_card_1 = card_attribute_assigner(input_deck[selected_card])
+                                attribute_card_2 = card_attribute_assigner(remaining_deck_instance[0])
+                                print(input_deck[selected_card], remaining_deck_instance[0])
+                                print(attribute_card_1, attribute_card_2)
+                                ######### TEMP ###########
+                                for card in attribute_card_1:
+                                    if card in attribute_card_2:
+                                        cards_played += 1
+                                        print("TEST SUCCESS CARD PLAYED")
+                                        break
                                 else:
                                     print("You cannot play this card.")
                             except ValueError:
