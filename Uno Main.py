@@ -221,19 +221,22 @@ def player_turn():
 
 # master function for the game logic (Calls most other functions and requires all previous variables)
 def game_loop(global_player_deck, remaining_deck):
-    current_player = 0
+    current_player_list = list(range(len(global_player_deck)))
+    current_player_num = int(0)
+
+    # while no player has won the game
     while win_condition_check(global_player_deck) == False:
-        print(f"Player {current_player + 1} Turn")
-        player_card_turn(global_player_deck[current_player], remaining_deck)
-        if: # Reverse Card #:
-            pass
-        elif: # Skip Card #:
-            current_player += 2
-        elif: # +2 / + 4 Card #:
-            pass
-        else: # normal game continues #:
-            current_player += 1
-        continue
+        try:
+            # print game state
+            print(f"Player {current_player_num + 1} Turn")
+            player_card_turn(global_player_deck[current_player_num], remaining_deck)
+            current_player_num += int(1)
+        except IndexError:
+            print("exception caught")
+            print(current_player_num)
+            current_player_num = int(len(current_player_list)/len(current_player_list))
+            print(current_player_num)
+            break
     return
 
 
