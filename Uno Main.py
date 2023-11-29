@@ -113,10 +113,11 @@ def deck_reader(input_deck):
 # Checks to make sure no player has won the game
 def win_condition_check(global_player_deck):
     player_tracker = 0
-    print(global_player_deck)
     for player_deck in global_player_deck:
         if len(player_deck) < 1:
             return True, player_tracker
+        else:
+            player_tracker += 1
     return False
 
 
@@ -224,7 +225,14 @@ def game_loop(global_player_deck, remaining_deck):
     while win_condition_check(global_player_deck) == False:
         print(f"Player {current_player + 1} Turn")
         player_card_turn(global_player_deck[current_player], remaining_deck)
-        current_player += 1 # add the logic for reverse cards and shit now
+        if: # Reverse Card #:
+            pass
+        elif: # Skip Card #:
+            current_player += 2
+        elif: # +2 / + 4 Card #:
+            pass
+        else: # normal game continues #:
+            current_player += 1
         continue
     return
 
@@ -232,14 +240,10 @@ def game_loop(global_player_deck, remaining_deck):
 # Loop for testing purposes only #
 while True:
     try:
-        # stores the output of our initialize as a variable
+        # creates the combined global player deck by calling deck builder function
         global_player_deck = game_initialize()
-
-        # this stores the player decks and the uno deck as a variable(s) to be easily accessible
-        # Unused players are given a deck of [-1] so it is very obvious when debugging if a player that should not be
-        # included in the game has somehow gotten into a turn
-
         combined_deck_temp = deck_builder(global_player_deck)
+        # splits the output of deck builder to get a global variable for player decks and for house deck
         global_player_deck = combined_deck_temp[0]
         remaining_deck = combined_deck_temp[1]
 
