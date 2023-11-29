@@ -55,24 +55,25 @@ def card_attribute_assigner(input_card): # Inputted in integer form
     if input_card < 0:
         attributes.append(f"Invalid {input_card}")
 
-    if (0 <= input_card <= 9) or (40 <= input_card <= 42):
-        attributes.append("red")
-    elif (10 <= input_card <= 19) or (43 <= input_card <= 45):
-        attributes.append("yellow")
-    elif (20 <= input_card <= 29) or (46 <= input_card <= 48):
-        attributes.append("green")
-    elif (30 <= input_card <= 39) or (49 <= input_card <= 51):
-        attributes.append("blue")
-
     if (input_card in (55, 54, 53, 52)):
         attributes.append("wild")
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card == 56 or input_card == 60:
+        attributes.append("red")
+    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card == 57 or input_card == 61:
+        attributes.append("yellow")
+    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card == 58 or input_card == 62:
+        attributes.append("green")
+    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card == 59 or input_card == 63:
+        attributes.append("blue")
+
     if input_card in (40, 43, 46, 49):
         attributes.append("skip")
-    if input_card in (41, 44, 47, 50):
+    elif input_card in (41, 44, 47, 50):
         attributes.append("reverse")
+
     if input_card in (42, 45, 48, 51):
         attributes.append("+2")
-    if input_card in (54, 55):
+    elif input_card in (54, 55, 60, 61, 62, 63):
         attributes.append("+4")
 
     if (input_card in (0, 10, 20, 30)):
@@ -160,11 +161,37 @@ def player_card_turn(input_deck, remaining_deck):
                             # is a valid card
                             attribute_card_player = card_attribute_assigner(input_deck[selected_card])
                             attribute_card_deck = [(attribute_card_player[0])]
+                            attribute_card_deck.append("wild") ###############
+                            attribute_card_player.append("wild") ##################
                             for attribute in attribute_card_deck:
                                 if attribute in attribute_card_player:
                                     valid_card_placed = True
-                            if "wild" in attribute_card_player:
-                                valid_card_placed = True
+
+                            while True:
+                                try:
+                                    if "wild" in attribute_card_player:
+                                        wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | 4 cancel | "))
+                                        if 0 <= wild_color_choice <= 4:
+                                            if wild_color_choice == 0:
+                                                attribute_card_deck.append("red")
+                                                break
+                                            elif wild_color_choice == 1:
+                                                attribute_card_deck.append("yellow")
+                                                break
+                                            elif wild_color_choice == 2:
+                                                attribute_card_deck.append("green")
+                                                break
+                                            elif wild_color_choice == 3:
+                                                attribute_card_deck.append("blue")
+                                                break
+                                            elif wild_color_choice == 4:
+                                                print("canceled action")
+                                                break
+                                        else:
+                                            print("Invalid input. Please enter a valid number.")
+                                except ValueError:
+                                    print("Invalid input. Please enter an valid number.")
+
                             if valid_card_placed == True:
                                 cards_played += 1
                                 print(f"Card {deck_reader([int(input_deck[int(selected_card)])])} played!")
@@ -230,12 +257,13 @@ def game_loop(global_player_deck, remaining_deck):
             # print game state
             print(f"Player {current_player_num + 1} Turn")
             player_card_turn(global_player_deck[current_player_num], remaining_deck)
+
+            # controls turn flow
             current_player_num += int(1)
+            if current_player_num > len(current_player_list):
+                current_player_num = int(len(current_player_list) / len(current_player_list)) - 1
         except IndexError:
             print("exception caught")
-            print(current_player_num)
-            current_player_num = int(len(current_player_list)/len(current_player_list))
-            print(current_player_num)
             break
     return
 
