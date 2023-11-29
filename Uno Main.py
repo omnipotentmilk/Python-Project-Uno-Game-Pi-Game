@@ -108,8 +108,11 @@ def card_reader(input_deck):
 
 # Interprets inputted cards and returns what their attributes are for the purposes of comparison
 # NOT for user display, only for game logic
+# This and the function above could easily be combined, however, for the sake of time I opted not to do that
 def card_attribute_assigner(input_card): # Inputted in integer form
+
     attributes = []
+
     if (0 <= input_card <= 9) or (40 <= input_card <= 42):
         attributes.append("red")
     elif (10 <= input_card <= 19) or (43 <= input_card <= 45):
@@ -118,6 +121,7 @@ def card_attribute_assigner(input_card): # Inputted in integer form
         attributes.append("green")
     elif (30 <= input_card <= 39) or (49 <= input_card <= 51):
         attributes.append("blue")
+
     if (input_card in (0, 10, 20, 30)):
         attributes.append("0")
     elif (input_card in (1, 11, 21, 31)):
@@ -168,31 +172,33 @@ def player_card_turn(input_deck, remaining_deck):
     attribute_card_1 = -1
     attribute_card_2 = -1
     selected_card = -1
-    print(input_deck) ########### remove later ##############
+    valid_card_placed = False
     while True:
         try:
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
             if (player_selection < 3 and player_selection > -1): # only pass if valid action
                 if player_selection == 0:
                     if cards_played < 1:
-                        while True:
-                            try:
-                                selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) |  "))
-                                selected_card -= 1
-                                attribute_card_1 = card_attribute_assigner(input_deck[selected_card])
-                                attribute_card_2 = card_attribute_assigner(remaining_deck_instance[0])
-                                print(input_deck[selected_card], remaining_deck_instance[0])
-                                print(attribute_card_1, attribute_card_2)
-                                ######### TEMP ###########
-                                for card in attribute_card_1:
-                                    if card in attribute_card_2:
-                                        cards_played += 1
-                                        print("TEST SUCCESS CARD PLAYED")
-                                        break
-                                else:
-                                    print("You cannot play this card.")
-                            except ValueError:
-                                print("Invalid input. Please enter a valid number.")
+                       while True:
+                        try:
+                            selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) or 0 to cancel |  "))
+                            selected_card -= 1
+                            if selected_card == -1:
+                                break
+                            attribute_card_1 = card_attribute_assigner(input_deck[selected_card])
+                            attribute_card_2 = card_attribute_assigner(remaining_deck_instance[0])
+                            for card in attribute_card_1:
+                                if card in attribute_card_2:
+                                    valid_card_placed = True
+                            if valid_card_placed == True:
+                                cards_played += 1
+                                print(f"Card {card_reader([int(input_deck[int(selected_card)])])} played!")
+                                break
+                            else:
+                                print("Cannot play this card.")
+                        except ValueError:
+                            print("Invalid input. Please enter a valid number.")
+                            continue
                     else:
                         print("Cannot play another card.")
                         continue
@@ -201,6 +207,7 @@ def player_card_turn(input_deck, remaining_deck):
                         cards_drawn += 1
                         input_deck.append(remaining_deck_instance[-1])
                         remaining_deck_instance.pop()
+                        print("")
                         print("Drew a card!")
                         print(f"Current Cards: {card_reader(input_deck)}")
                         print(f"Top Deck Card: {card_reader([remaining_deck_instance[0]])}")
@@ -234,6 +241,7 @@ def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_p
         ######################## remove later #####################################################################
 
         if len(current_player) == 2:
+            print("")
             print("Player 1 Turn")
             card_reader(player1_deck)
             player_card_turn(player1_deck, remaining_deck)
