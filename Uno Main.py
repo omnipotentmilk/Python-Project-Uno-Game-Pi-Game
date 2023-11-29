@@ -127,7 +127,6 @@ def card_attribute_assigner(input_card): # Inputted in integer form
     if (input_card in (55, 54, 53, 52)):
         attributes.append("wild")
 
-    print(input_card)
     return attributes
     # TODO implement WILD CARD attribute and special attributes ####
 
@@ -175,14 +174,13 @@ def player_card_turn(input_deck, remaining_deck):
                                 break
 
                             # in the case the player selects a card from their deck, compare it against deck
-                            attribute_card_player = card_attribute_assigner(remaining_deck_instance[0])
-                            attribute_card_deck = card_attribute_assigner(input_deck[selected_card])
-                            for card in attribute_card_deck:
-                                if (card in attribute_card_player):
+                            attribute_card_player = card_attribute_assigner(input_deck[selected_card])
+                            attribute_card_deck = [(attribute_card_player[0])]
+                            for attribute in attribute_card_deck:
+                                if attribute in attribute_card_player:
                                     valid_card_placed = True
-                            if ("wild" in attribute_card_player):
+                            if "wild" in attribute_card_player:
                                 valid_card_placed = True
-                            print(valid_card_placed)
 
                             # if comparison shows success, end action. if not, end action
                             if valid_card_placed == True:
@@ -190,8 +188,6 @@ def player_card_turn(input_deck, remaining_deck):
                                 print(f"Card {card_reader([int(input_deck[int(selected_card)])])} played!")
                                 break
                             else:
-                                print(attribute_card_player)
-                                print(attribute_card_deck)
                                 print("Cannot play this card.")
                                 continue
 
