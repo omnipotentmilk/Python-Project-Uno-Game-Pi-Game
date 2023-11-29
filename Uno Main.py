@@ -120,14 +120,36 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
         return False
 
 
-# Makes sure the played card is accurate and can actually be played.
-def played_card_validator(input_card, top_card): # Inputted in integer form
-    print(input_card)
+# attributes stuff to an input card in order to compare them
+def card_attribute_assigner(input_card): # Inputted in integer form
     if (0 <= input_card <= 9) or (40 <= input_card <= 42):
         print("red")
-    else:
-        print("GOD IS DEAD")
-
+    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
+        print("yellow")
+    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
+        print("greem")
+    elif (0 <= input_card <= 9) or (0 <= input_card <= 9):
+        print("blue")
+    elif (input_card in (0, 10, 20, 30)):
+        print("0")
+    elif (input_card in (1, 11, 21, 31)):
+        print("1")
+    elif (input_card in (2, 12, 22, 32)):
+        print("2")
+    elif (input_card in (3, 13, 23, 33)):
+        print("3")
+    elif (input_card in (4, 14, 24, 34)):
+        print("4")
+    elif (input_card in (5, 15, 25, 35)):
+        print("5")
+    elif (input_card in (6, 16, 26, 36)):
+        print("6")
+    elif (input_card in (7, 17, 27, 37)):
+        print("7")
+    elif (input_card in (8, 18, 28, 38)):
+        print("8")
+    elif (input_card in (9, 19, 29, 39)):
+        print("9")
     # 0 - 9 = red
     # 10 - 19 = yellow
     # 20 - 29 = green
