@@ -6,10 +6,6 @@ import random
 ################################## Remove later ##################
 
 # modular way to change the player count
-
-############# remove later ##################################################################################
-# Might replace this with a function that simply reads the length of the global nested list of player decks #
-################################################### remove later ############################################
 def game_initialize():
     while True:
         try:
@@ -17,22 +13,22 @@ def game_initialize():
             if player_count > 7:
                 player_count = 7
                 print("you don't have enough cards, changing player count to 7 . . .")
-            global_player_list = list(range(player_count))
-            return global_player_list
+            global_player_deck = list(range(player_count))
+            return global_player_deck
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
 
 
 # generates a valid uno deck, shuffles it, and properly distributes it to the players
-def deck_builder(variable_player_count, global_player_list):
+def deck_builder(global_player_deck):
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
     players_deck_temp = []
     global_player_list_decks = []
 
     # properly slices the deck, adding 7 cards at a time to a temporary new deck
-    for _ in range(variable_player_count):
+    for _ in range(len(global_player_deck)):
         player_deck = uno_deck_instance[:7]
         uno_deck_instance = uno_deck_instance[7:]
         players_deck_temp.append(player_deck)
@@ -43,11 +39,12 @@ def deck_builder(variable_player_count, global_player_list):
         uno_deck_instance.append(uno_deck_instance[0])
         uno_deck_instance.pop(0)
 
-    # Distribute the temporary new deck segments (which are 7 long) to the players in global_player_list
-    for i in global_player_list:
+    # Distribute the temporary new deck segments (which are 7 long) to the players in global_player_deck
+    for i in global_player_deck:
         global_player_list_decks.append(players_deck_temp[i])
 
-    return global_player_list_decks, uno_deck_instance
+    output = [global_player_list_decks, uno_deck_instance]
+    return output
 
 
 
@@ -114,17 +111,14 @@ def deck_reader(input_deck):
 
 
 # Checks to make sure no player has won the game
-def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
-    if len(player1_deck) == 0:
-        return 0
-    elif len(player2_deck) == 0:
-        return 1
-    elif len(player3_deck) == 0:
-        return 2
-    elif len(player4_deck) == 0:
-        return 3
-    else:
-        return False
+def win_condition_check(global_player_deck):
+    player_tracker = 0
+    print(global_player_deck)
+    for player_deck in global_player_deck:
+        if len(player_deck) < 1:
+            return True, player_tracker
+    return False
+
 
 
 
@@ -219,36 +213,19 @@ def player_card_turn(input_deck, remaining_deck):
 
 
 
-def player_turn(variable_player_count):
+def player_turn():
     return
 
 
 
 # master function for the game logic (Calls most other functions and requires all previous variables)
-def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck):
-    current_player = list(range(variable_player_count))
-    while win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck) == False:
-
-        ############## remove later ###############################################################################
-        # I might replace this with a function because im literally doing the same thing 3 times. i cld just call #
-        # a function instead
-        # second option, use global variables and f"player {n} turn" to be infnitely modular
-        # append players to the list to add players
-        ######################## remove later #####################################################################
-
-        if len(current_player) == 2:
-            print("Player 0 Turn")
-            deck_reader(player1_deck)
-            player_card_turn(player1_deck, remaining_deck)
-        elif len(current_player) == 3:
-            print("Player 0 Turn")
-            deck_reader(player1_deck)
-            player_card_turn(player1_deck, remaining_deck)
-        elif len(current_player) == 4:
-            print("Player 0 Turn")
-            deck_reader(player1_deck)
-            player_card_turn(player1_deck, remaining_deck)
-        break
+def game_loop(global_player_deck, remaining_deck):
+    current_player = 0
+    while win_condition_check(global_player_deck) == False:
+        print(f"Player {current_player + 1} Turn")
+        player_card_turn(global_player_deck[current_player], remaining_deck)
+        current_player += 1 # add the logic for reverse cards and shit now
+        continue
     return
 
 
@@ -256,17 +233,18 @@ def game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_p
 while True:
     try:
         # stores the output of our initialize as a variable
-        global_player_list = game_initialize()
-        variable_player_count = len(global_player_list)
+        global_player_deck = game_initialize()
 
         # this stores the player decks and the uno deck as a variable(s) to be easily accessible
         # Unused players are given a deck of [-1] so it is very obvious when debugging if a player that should not be
         # included in the game has somehow gotten into a turn
 
-        global_player_list, remaining_deck = deck_builder(variable_player_count, global_player_list)
+        combined_deck_temp = deck_builder(global_player_deck)
+        global_player_deck = combined_deck_temp[0]
+        remaining_deck = combined_deck_temp[1]
 
         # Calls the main game loop func and provides all variables it needs
-        game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck)
+        game_loop(global_player_deck, remaining_deck)
 
         # lets me quit while debugging
         RAH = int(input("enter integer"))
