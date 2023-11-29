@@ -29,6 +29,7 @@ def deck_builder(variable_player_count, global_player_list):
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
     players_deck_temp = []
+    global_player_list_decks = []
 
     # properly slices the deck, adding 7 cards at a time to a temporary new deck
     for _ in range(variable_player_count):
@@ -42,16 +43,11 @@ def deck_builder(variable_player_count, global_player_list):
         uno_deck_instance.append(uno_deck_instance[0])
         uno_deck_instance.pop(0)
 
-    # unpacks the temporary new deck evenly to the players.
-    if variable_player_count == 2:
-        player1_deck, player2_deck = players_deck_temp
-        return player1_deck, player2_deck, uno_deck_instance, players_deck_temp
-    elif variable_player_count == 3:
-        player1_deck, player2_deck, player3_deck = players_deck_temp
-        return player1_deck, player2_deck, player3_deck, uno_deck_instance, players_deck_temp
-    elif variable_player_count == 4:
-        player1_deck, player2_deck, player3_deck, player4_deck = players_deck_temp
-        return player1_deck, player2_deck, player3_deck, player4_deck, uno_deck_instance, players_deck_temp
+    # Distribute the temporary new deck segments (which are 7 long) to the players in global_player_list
+    for i in global_player_list:
+        global_player_list_decks.append(players_deck_temp[i])
+
+    return global_player_list_decks, uno_deck_instance
 
 
 
@@ -261,24 +257,13 @@ while True:
     try:
         # stores the output of our initialize as a variable
         global_player_list = game_initialize()
-        print(global_player_list)
         variable_player_count = len(global_player_list)
 
         # this stores the player decks and the uno deck as a variable(s) to be easily accessible
         # Unused players are given a deck of [-1] so it is very obvious when debugging if a player that should not be
         # included in the game has somehow gotten into a turn
-        if variable_player_count == 2:
-            player1_deck, player2_deck, remaining_deck, combined_deck_list = deck_builder(variable_player_count, global_player_list)
-            player3_deck = [-1]
-            player4_deck = [-1]
-        elif variable_player_count == 3:
-            player1_deck, player2_deck, player3_deck, remaining_deck, combined_deck_list = deck_builder(
-                variable_player_count, global_player_list)
-            player4_deck = [-1]
-        elif variable_player_count == 4:
-            player1_deck, player2_deck, player3_deck, player4_deck, remaining_deck, combined_deck_list = deck_builder(
-                variable_player_count, global_player_list)
 
+        global_player_list, remaining_deck = deck_builder(variable_player_count, global_player_list)
 
         # Calls the main game loop func and provides all variables it needs
         game_loop(player1_deck, player2_deck, player3_deck, player4_deck, variable_player_count, remaining_deck)
