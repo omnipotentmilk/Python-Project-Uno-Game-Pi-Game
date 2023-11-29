@@ -55,7 +55,7 @@ def card_attribute_assigner(input_card): # Inputted in integer form
     if input_card < 0:
         attributes.append(f"Invalid {input_card}")
 
-    if (input_card in (55, 54, 53, 52)):
+    if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52)):
         attributes.append("wild")
     if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card == 56 or input_card == 60:
         attributes.append("red")
@@ -161,31 +161,29 @@ def player_card_turn(input_deck, remaining_deck):
                             # is a valid card
                             attribute_card_player = card_attribute_assigner(input_deck[selected_card])
                             attribute_card_deck = [(attribute_card_player[0])]
-                            attribute_card_deck.append("wild") ###############
-                            attribute_card_player.append("wild") ##################
                             for attribute in attribute_card_deck:
                                 if attribute in attribute_card_player:
                                     valid_card_placed = True
 
+                            # logic behind if the chosen card was a wild card.
                             while True:
                                 try:
                                     if "wild" in attribute_card_player:
-                                        wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | 4 cancel | "))
+                                        wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
+
+                                        # changes the top deck card to match the associated card_attribute_assigner value
                                         if 0 <= wild_color_choice <= 4:
                                             if wild_color_choice == 0:
-                                                attribute_card_deck.append("red")
+                                                remaining_deck_instance[0] = 56
                                                 break
                                             elif wild_color_choice == 1:
-                                                attribute_card_deck.append("yellow")
+                                                remaining_deck_instance[0] = 57
                                                 break
                                             elif wild_color_choice == 2:
-                                                attribute_card_deck.append("green")
+                                                remaining_deck_instance[0] = 58
                                                 break
                                             elif wild_color_choice == 3:
-                                                attribute_card_deck.append("blue")
-                                                break
-                                            elif wild_color_choice == 4:
-                                                print("canceled action")
+                                                remaining_deck_instance[0] = 59
                                                 break
                                         else:
                                             print("Invalid input. Please enter a valid number.")
@@ -241,12 +239,8 @@ def player_card_turn(input_deck, remaining_deck):
 
 
 
-def player_turn():
-    return
-
-
-
 # master function for the game logic (Calls most other functions and requires all previous variables)
+# is RESPONSIBLE FOR THE TURN LOGIC
 def game_loop(global_player_deck, remaining_deck):
     current_player_list = list(range(len(global_player_deck)))
     current_player_num = int(0)
