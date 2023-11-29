@@ -40,6 +40,13 @@ def deck_builder(variable_player_count):
         uno_deck_instance = uno_deck_instance[7:]
         players_deck_temp.append(player_deck)
 
+    # at the end of deck creation, if top card would be a wild card, append to back and delete.
+    if (uno_deck_instance[0] == 55) or (uno_deck_instance[0] == 54) or (uno_deck_instance[0] == 53) or (uno_deck_instance[0] == 52):
+        uno_deck_instance.append(0)
+        uno_deck_instance.pop(0)
+    else:
+        pass
+
     # Use unpacking to return each players deck
     if variable_player_count == 2:
         player1_deck, player2_deck = players_deck_temp
@@ -82,7 +89,8 @@ def card_reader(input_deck):
         "Green Special Skip", "Green Special Reverse", "Green Special +2",
         "Blue Special Skip", "Blue Special Reverse", "Blue Special +2",
         "Wild Card Color Change", "Wild Card Color Change", "Wild Card +4 Color Change", "Wild Card +4 Color Change"
-    ]
+    ] # If the top deck card is a wild card, i dont know what to do, impleement a fix so the first player choses what card
+    # will be the wild card
 
     # creates an empty list to be used later
     output = []
@@ -113,8 +121,9 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 
 
 
-def played_card_validator():
-    pass
+def played_card_validator(input_card):
+    print(input_card)
+    return
 
 
 # Holds all of the logic associated with a player turn other than checking if a played card is valid.
@@ -132,16 +141,16 @@ def player_card_turn(input_deck, remaining_deck):
                 if player_selection == 0:
                     if cards_played < 1:
                         cards_played += 1
-                        while True:
-                            try:
-                                ############ remove later ################
-                                # add card selection, call played card validator.
-                                # after, figure out how to implement the reverse card and skip turn card :skull:
-                                ######### remove later ##############
-                                break
-                            except ValueError:
-                                print("Invalid input. Please enter a valid number.")
-                        break
+                        try:
+                            selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) |  "))
+                            selected_card -= 1 # need to subtract one from slection because lists include 0
+                            valid_card = played_card_validator(input_deck[selected_card]) # passes selected card to validator function
+                            if valid_card == True:
+                                print("TEST SUCCESS CARD PLAYED")
+                            else:
+                                print("You cannot play this card")
+                        except ValueError:
+                            print("Invalid input. Please enter a valid number.")
                     else:
                         print("Cannot play another card.")
                         continue
@@ -159,7 +168,7 @@ def player_card_turn(input_deck, remaining_deck):
                         continue
                     break
                 elif player_selection == 2:
-                    if (cards_drawn > 1) or (cards_played > 1):
+                    if (cards_drawn > 0) or (cards_played > 0):
                         break # The user has completed all requirements for a turn
                     else:
                         print("Cannot end turn.")
