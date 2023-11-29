@@ -7,7 +7,10 @@ import random
 
 
 
-# asks the user to specify how many players will be playing
+# modular way to change the player count
+############# remove later ##################################################################################
+# Might replace this with a function that simply reads the length of the global nested list of player decks #
+################################################### remove later ############################################
 def game_initialize():
     while True:
         try:
@@ -20,30 +23,30 @@ def game_initialize():
             print("Invalid input. Please enter a valid number.")
 
 
-# creates the player decks (depending on player count) and the remaining decks
+# generates a valid uno deck, shuffles it, and properly distributes it to the players
 def deck_builder(variable_player_count):
-    # create & shuffle the initial UNO deck
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
-
-    # Initialize a empty list which will be used to help create the player deck
     players_deck_temp = []
 
-    # Depending on the number of players, slice the original uno deck 7 cards at a time and append resulting list
-    # to temp deck for later
+    # properly slices the deck, adding 7 cards at a time to a temporary new deck
     for _ in range(variable_player_count):
         player_deck = uno_deck_instance[:7]
         uno_deck_instance = uno_deck_instance[7:]
         players_deck_temp.append(player_deck)
 
-    # at the end of deck creation, if top card would be a wild card, append to back and delete.
+    # makes sure that the top card of the remaining deck would not be a wild card.
+    # if it is, send that card to the bottom of the remaining deck
     if (uno_deck_instance[0] == 55) or (uno_deck_instance[0] == 54) or (uno_deck_instance[0] == 53) or (uno_deck_instance[0] == 52):
         uno_deck_instance.append(0)
         uno_deck_instance.pop(0)
     else:
         pass
 
-    # Use unpacking to return each players deck
+    # unpacks the temporary new deck evenly to the players.
+    ####### remove later ################################################################################################
+    # repace with a statement  that uses the variable player {n} count to determine waht number to divide the deck into #
+    ####################################### remove later ################################################################
     if variable_player_count == 2:
         player1_deck, player2_deck = players_deck_temp
         return player1_deck, player2_deck, uno_deck_instance, players_deck_temp
@@ -56,25 +59,8 @@ def deck_builder(variable_player_count):
 
 
 
-# takes a players deck and prints its contents
-# this is neccessary because the game logic only works with numbers (ex: Game will be working with the list [0, 1]
-# But the player will be looking at what those numbers represent [Red 0, Red1] )
-def deck_reader(input_deck):
-    output = []
-
-    for card in input_deck:
-        card_attributes = card_attribute_assigner(card)
-        output.append(card_attributes)
-
-    return output
-
-
-
-# Interprets inputted cards and returns what their attributes are for the purposes of comparison
-# NOT for user display, only for game logic
-# This and the function above could easily be combined, however, for the sake of time I opted not to do that
+# converts card number |ex: [10]| to readable format |ex [yellow, 0]|
 def card_attribute_assigner(input_card): # Inputted in integer form
-
     attributes = []
 
     if input_card < 0:
@@ -91,16 +77,12 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
     if (input_card in (55, 54, 53, 52)):
         attributes.append("wild")
-
     if input_card in (40, 43, 46, 49):
         attributes.append("skip")
-
     if input_card in (41, 44, 47, 50):
         attributes.append("reverse")
-
     if input_card in (42, 45, 48, 51):
         attributes.append("+2")
-
     if input_card in (54, 55):
         attributes.append("+4")
 
@@ -129,7 +111,17 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
 
 
-# Checks to make sure no player has won the game!
+# modular way to read an entire deck of cards rather than an individual card.
+def deck_reader(input_deck):
+    output = []
+    for card in input_deck:
+        card_attributes = card_attribute_assigner(card)
+        output.append(card_attributes)
+    return output
+
+
+
+# Checks to make sure no player has won the game
 def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
     if len(player1_deck) == 0:
         return 0
@@ -144,7 +136,7 @@ def win_condition_check(player1_deck, player2_deck, player3_deck, player4_deck):
 
 
 
-# Holds all of the logic associated with a player turn other than checking if a played card is valid.
+# Holds all of the logic associated with a player turn
 def player_card_turn(input_deck, remaining_deck):
     remaining_deck_instance = remaining_deck
     cards_drawn = 0
@@ -156,22 +148,29 @@ def player_card_turn(input_deck, remaining_deck):
     while True:
         try:
 
+            # prints the card information and action information for the player to make a decision
             print("")
             print(f"Current Cards: {deck_reader(input_deck)}")
             print(f"Top Deck Card: {deck_reader([remaining_deck_instance[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
-            if (player_selection < 3 and player_selection > -1): # only pass if valid action
-                if player_selection == 0:
 
-                    if cards_played < 1: # In the case a player attempts to play a card
+            # controls the logic behind player input
+            if (player_selection < 3 and player_selection > -1):
+
+                # Logic behind if the player selects a card
+                if player_selection == 0:
+                    if cards_played < 1:
                        while True:
                         try:
+
+                            # asks the user which card to select
                             selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) or 0 to cancel |  "))
                             selected_card -= 1
                             if selected_card == -1:
                                 break
 
-                            # in the case the player selects a card from their deck, compare it against deck
+                            # logic behind comparing the top deck card to the chosen player card to make sure card played
+                            # is a valid card
                             attribute_card_player = card_attribute_assigner(input_deck[selected_card])
                             attribute_card_deck = [(attribute_card_player[0])]
                             for attribute in attribute_card_deck:
@@ -179,8 +178,6 @@ def player_card_turn(input_deck, remaining_deck):
                                     valid_card_placed = True
                             if "wild" in attribute_card_player:
                                 valid_card_placed = True
-
-                            # if comparison shows success, end action. if not, end action
                             if valid_card_placed == True:
                                 cards_played += 1
                                 print(f"Card {deck_reader([int(input_deck[int(selected_card)])])} played!")
@@ -193,11 +190,14 @@ def player_card_turn(input_deck, remaining_deck):
                         except ValueError:
                             print("Invalid input. Please enter a valid number.")
                             continue
+
+                    # in the case the player has already played a card
                     else:
                         print("Cannot play another card.")
                         continue
 
-                elif player_selection == 1: # In the case the player attempts to draw a card
+                # Logic behind if a player draws a card
+                elif player_selection == 1:
                     if cards_drawn < 1 and cards_played < 1:
                         cards_drawn += 1
                         input_deck.append(remaining_deck_instance[-1])
@@ -209,13 +209,16 @@ def player_card_turn(input_deck, remaining_deck):
                         continue
                     break
 
-                elif player_selection == 2: # in the case the player attempts to end their turn
+                # Logic behind if a player ends their turn
+                elif player_selection == 2:
                     if (cards_drawn > 0) or (cards_played > 0):
                         print("Turn ending . . . ")
                         break
                     else:
                         print("Cannot end turn.")
                         continue
+
+        # Error handling for initial action choice
             else:
                 print("Invalid input. Please enter a number between 0 and 2.")
         except ValueError:
