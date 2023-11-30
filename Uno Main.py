@@ -4,7 +4,9 @@
 
 import random
 
-# modular way to change the player count
+
+
+# function to prompt for the player/card count
 def game_initialize():
     while True:
         try:
@@ -25,6 +27,8 @@ def game_initialize():
 
 
 # generates a valid uno deck, shuffles it, and properly distributes it to the players
+# afterwards, generates an output; index[0] being a nested list containing the player decks
+# index[1] being the remaining cards after distributing
 def deck_builder(global_player_deck, global_card_count):
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
@@ -57,7 +61,7 @@ def deck_builder(global_player_deck, global_card_count):
 
 
 
-# converts card number |ex: [10]| to readable format |ex [yellow, 0]|
+# converts card number |ex: [10]| to attribute format |ex [yellow, 0]|
 def card_attribute_assigner(input_card): # Inputted in integer form
     attributes = []
 
@@ -113,7 +117,7 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
 
 
-# modular way to read an entire deck of cards rather than an individual card.
+# easy way to read an entire deck of cards rather than an individual card.
 def deck_reader(input_deck):
     output = []
     for card in input_deck:
@@ -123,20 +127,22 @@ def deck_reader(input_deck):
 
 
 
-# Checks to make sure no player has won the game
+# checks to make sure no player has won the game
 def win_condition_check(global_player_deck):
     player_tracker = 0
 
     # reads through each index of the nested global player list
     for player_deck in global_player_deck:
 
-        # if length of the list at index 1 is smalelr than 1, return that player's number
+        # if the nested list at index 1 has a length < 1, return that player's number because they are the winner
         if len(player_deck) < 1:
             return True, player_tracker
 
         # if not, increment player tracker to the next player
         else:
             player_tracker += 1
+
+    # return false if the loop did not find a winning player
     return False
 
 
@@ -148,7 +154,7 @@ def win_condition_check(global_player_deck):
 
 
 
-# Holds all of the logic associated with a player turn
+# Holds all of the logic associated with a individual player turn
 def player_card_turn(input_deck, remaining_deck):
 
     # initializes a bunch of empty variables that will be used throughout the function.
@@ -161,8 +167,8 @@ def player_card_turn(input_deck, remaining_deck):
     valid_card_placed = False
     deck_length = len(remaining_deck)
 
-    # If top card was a +2/+4/skip, notify player and do appropriate logic
-    if len(remaining_deck) > 4:
+    # If top card was a +2/+4, notify player and do appropriate logic
+    if len(remaining_deck) > 4: # ######################################## REMOVE NOT NEEDED ANYMORE ###################
         previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
         if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
             print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
@@ -191,36 +197,39 @@ def player_card_turn(input_deck, remaining_deck):
                 input_deck.append(remaining_deck[-1])
                 remaining_deck.pop()
 
-    # player turn logic begins here
+        # checks to make sure a skip card has not been played, return output if it has.
+        previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
+        if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
+            print(f"\nPrevious player skip card in effect. Skipping turn . . .")
+            if "red" in previous_player_skip_check:
+                remaining_deck[0] = 64
+            elif "yellow" in previous_player_skip_check:
+                remaining_deck[0] = 65
+            elif "green" in previous_player_skip_check:
+                remaining_deck[0] = 66
+            elif "blue" in previous_player_skip_check:
+                remaining_deck[0] = 67
+
+            # packaging outputs at the end of a player turn as a result of a skip
+            output = [input_deck, remaining_deck]
+            return output
+
+    # player action logic begins here
     while True:
         try:
-
-            # checks to make sure a skip card has not been played
-            previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
-            if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
-                print(f"\nPrevious player skip card in effect. Skipping turn . . .")
-                if "red" in previous_player_skip_check:
-                    remaining_deck[0] = 64
-                elif "yellow" in previous_player_skip_check:
-                    remaining_deck[0] = 65
-                elif "green" in previous_player_skip_check:
-                    remaining_deck[0] = 66
-                elif "blue" in previous_player_skip_check:
-                    remaining_deck[0] = 67
-
-                # terminates player turn immediately if so.
-                break
 
             # prints the card information and action information for the player to make a decision
             print(f"\nCurrent Cards: {deck_reader(input_deck)}")
             print(f"Top Deck Card: {deck_reader([remaining_deck[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
 
-            # master if statement that makes sure a input corresponds to a valid action
+            # verifies that the player has made a valid selection
             if (player_selection < 3 and player_selection > -1):
 
-                # Logic behind if the player input is to select a card
+                # action logic if the player wants to place a card
                 if player_selection == 0:
+
+                    # continue so long as a card has not already been played
                     if cards_played < 1:
                         while True:
                             try:
@@ -232,7 +241,7 @@ def player_card_turn(input_deck, remaining_deck):
                                     print("\ncancelled card placement.")
                                     break
 
-                                # logic behind making sure the player's chosen card can be legally played
+                                # makes sure chosen card can be legally placed
                                 attribute_card_player = card_attribute_assigner(input_deck[selected_card])
                                 attribute_card_deck = card_attribute_assigner(remaining_deck[0])
                                 for attribute in attribute_card_deck:
@@ -241,12 +250,12 @@ def player_card_turn(input_deck, remaining_deck):
                                 if "wild" in attribute_card_player:
                                     valid_card_placed = True
 
-                                # updates the deck and the player hand
+                                # if card COULD be legally placed, continue to further logic
                                 if valid_card_placed == True:
                                     while True:
                                         try:
 
-                                            # first runs a special updater for if the card is wild
+                                            # if legal card played was a wild card
                                             if "wild" in attribute_card_player:
                                                 wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
                                                 if 0 <= wild_color_choice <= 4:
@@ -269,16 +278,36 @@ def player_card_turn(input_deck, remaining_deck):
                                                 else:
                                                     print("Invalid input. Please enter a valid number.")
 
-                                            # if the card was not wild, proceed without the normal updater
+                                            # if legal card played was a +2/+4 card AND there are enough cards remaining
+                                            elif "+2" in attribute_card_player:
+                                                if deck_length > 2:
+                                                    remaining_deck.insert(0, input_deck[selected_card])
+                                                    removed_card = input_deck[selected_card]
+                                                    input_deck.pop(selected_card)
+                                                else:
+                                                    valid_card_placed = False
+                                            elif "+4" in attribute_card_player:
+                                                if deck_length > 4:
+                                                    remaining_deck.insert(0, input_deck[selected_card])
+                                                    removed_card = input_deck[selected_card]
+                                                    input_deck.pop(selected_card)
+                                                else:
+                                                    valid_card_placed = False
+
+                                            # if legal card played was any other card
                                             else:
                                                 remaining_deck.insert(0, input_deck[selected_card])
                                                 removed_card = input_deck[selected_card]
                                                 input_deck.pop(selected_card)
+
+                                            # exit the legal card placement logic
                                             break
+
+                                        # incase wild card color selection was invalid
                                         except ValueError:
                                             print("Invalid input. Please enter a valid number.")
 
-                                # printing what card was played.
+                                # printing what legal card was played.
                                 if valid_card_placed == True:
                                     cards_played += 1
                                     print(f"\nCard {[card_attribute_assigner(removed_card)]} played!")
@@ -287,17 +316,23 @@ def player_card_turn(input_deck, remaining_deck):
                                     print("Cannot play this card.")
                                     continue
 
-                            # error handling
+                            # incase the player enters an invalid/non integer when selecting a card to be placed
                             except ValueError:
                                 print("Invalid input. Please enter a valid number.")
                                 continue
+
+                    # incase a card has already been played, restart the loop.
                     else:
                         print("Cannot play another card.")
                         continue
 
                 # Logic behind if the player input is to draw a card
                 elif player_selection == 1:
-                    if len(remaining_deck) > 4:
+
+                    # makes sure there is atleast 1 other card that can be drawn from the deck
+                    if len(remaining_deck) > 1:
+
+                        # if no cards have been drawn or placed, draw a card. otherwise, continue back to selection
                         if cards_drawn < 1 and cards_played < 1:
                             cards_drawn += 1
                             input_deck.append(remaining_deck[-1])
@@ -322,14 +357,13 @@ def player_card_turn(input_deck, remaining_deck):
         except ValueError:
             print("Invalid input. Please enter a number between 0 and 2.")
 
-    # packaging outputs at the end of a player turn
+    # packaging outputs at the end of a player turn as a result of manually ending turn
     output = [input_deck, remaining_deck]
     return output
 
-
+################################################ bad documentation line ################################################
 
 # master function for the game logic (Calls most other functions and requires all previous variables)
-############## WILL BE RESPONSIBLE FOR THE TURN LOGIC / REVERSE CARD LOGIC ############################
 def game_loop(global_player_deck, remaining_deck):
     current_player_list = list(range(len(global_player_deck)))
     current_player_num = int(0)
