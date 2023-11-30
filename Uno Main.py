@@ -15,22 +15,25 @@ def game_initialize():
             player_count = int(input("\nWelcome to UnoPy! Please enter the player count (1-infinity): "))
             card_count = int(input("Please enter the number of cards per player (1-infinity): "))
 
-            # verifies that the input is greater than 0
+            # verifies that the input is greater than 0 (otherwise game would be impossible to play
             if player_count > 0 and card_count > 0:
 
-                # if it is,
+                # if it is, create a list that is the length of the player_count long.
+                # package this as a list at index 1, and package the player count at index 2
+                # return this packaged list to the initialization loop
                 global_player_deck = list(range(player_count))
                 return [global_player_deck, card_count]
 
-        # handles errors associated with player selection
+    # handles errors associated with player selection or acts of god
             else:
                 print("Invalid input. Please enter a valid number")
                 continue
         except ValueError:
             print("Invalid input. Please enter an integer.")
-    global_player_deck = -1
-    card_count = -1
-    return [global_player_deck, card_count]
+
+    # this will likely never run, but hey, just incase
+    print("ERROR")
+    return "ERROR"
 
 
 
@@ -39,15 +42,18 @@ def game_initialize():
 # output[1] being the remaining cards after distributing
 def deck_builder(global_player_deck, global_card_count):
 
-    # initialize variables for later use
-    players_deck_temp = []
+    # initialize variables for later use, it's best to ignore these for now
+    players_deck_temp = [] #
     global_player_list_decks = []
     decks_generated = 0
 
-    # Determine the total number of cards required
+    # Determine the total number of cards required VIA the len output[1] of the initialize function
+    # in other words, if a list of 4 players are selected, output[1] is a list 4 indexes long.
+    # taking the length of that list essentially gives us the player count.
     total_cards_needed = len(global_player_deck) * global_card_count
 
-    # Calculate the number of decks required. if its divisible by
+    # Calculate the number of decks required. If divisible by 56 (1 uno deck) continue, else add 1 to the number required
+    # This helps us to avoid not generating enough decks in the case that the # of decks per player is not a multiple of 56
     if total_cards_needed % 56 == 0:
         decks_required = total_cards_needed // 56
     else:
