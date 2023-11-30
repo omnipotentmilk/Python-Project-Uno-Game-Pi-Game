@@ -8,7 +8,7 @@ import random
 def game_initialize():
     while True:
         try:
-            player_count = int(input("Welcome to UnoPy! Please enter the player count (1-55): "))
+            player_count = int(input("\nWelcome to UnoPy! Please enter the player count (1-55): "))
             card_count = int(input("Please enter the number of cards per player (1-55): "))
             if 1 <= player_count <= 55 and 1 <= card_count <= 56 and (player_count * card_count) + 1 <= 56:
 
@@ -38,8 +38,8 @@ def deck_builder(global_player_deck, global_card_count):
         uno_deck_instance = uno_deck_instance[global_card_count:]
         players_deck_temp.append(player_deck)
 
-    # makes sure that the top card of the remaining deck would not be a wild or +2/+4 card.
-    if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51}:
+    # makes sure that the top card of the remaining deck would not be a wild or +2/+4/skip/reverse card.
+    if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
         uno_deck_instance.append(uno_deck_instance[0])
         uno_deck_instance.pop(0)
 
@@ -62,18 +62,20 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
     if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52)):
         attributes.append("wild")
-    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60):
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72):
         attributes.append("red")
-    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61):
+    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61, 65, 69, 73):
         attributes.append("yellow")
-    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62):
+    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62, 66, 70, 74):
         attributes.append("green")
-    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63):
+    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63, 67, 71, 75):
         attributes.append("blue")
 
-    if input_card in (40, 43, 46, 49):
+    if input_card in (40, 43, 46, 49, 64, 65, 66, 67):
         attributes.append("skip")
-    elif input_card in (41, 44, 47, 50):
+    if input_card in (64, 65, 66, 67, 68, 72, 69, 73, 70, 74, 71, 75):
+        attributes.append("inactive")
+    if input_card in (41, 44, 47, 50):
         attributes.append("reverse")
 
     if input_card in (42, 45, 48, 51):
@@ -154,21 +156,55 @@ def player_card_turn(input_deck, remaining_deck):
     valid_card_placed = False
     deck_length = len(remaining_deck)
 
-    # If top card was a +2 or +4, notify player and add to their deck.
-    previous_player_2_or_4 = card_attribute_assigner(remaining_deck[0])
-    if "+2" in previous_player_2_or_4:
-        print(f"\nPrevious player +2 card in effect. Cards Added:\n {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
-        for _ in range(2):
-            input_deck.append(remaining_deck[-1])
-            remaining_deck.pop()
-    elif "+4" in previous_player_2_or_4:
-        print(f"\nPrevious player +2 card in effect. Cards Added:\n {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
-        for _ in range(4):
-            input_deck.append(remaining_deck[-1])
-            remaining_deck.pop()
+    # If top card was a +2 or +4, notify player and add to their deck (So long as there is enough cards in the deck)
+    if len(remaining_deck) > 4:
+        previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
+        if "+2" in previous_player_2_or_4_check:
+            print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
+            if "red" in previous_player_2_or_4_check:
+                remaining_deck[0] = 68
+            elif "yellow" in previous_player_2_or_4_check:
+                remaining_deck[0] = 69
+            elif "green" in previous_player_2_or_4_check:
+                remaining_deck[0] = 70
+            elif "blue" in previous_player_2_or_4_check:
+                remaining_deck[0] = 71
+            for _ in range(2):
+                input_deck.append(remaining_deck[-1])
+                remaining_deck.pop()
+        elif "+4" in previous_player_2_or_4_check:
+            print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
+            if "red" in previous_player_2_or_4_check:
+                remaining_deck[0] = 72
+            elif "yellow" in previous_player_2_or_4_check:
+                remaining_deck[0] = 73
+            elif "green" in previous_player_2_or_4_check:
+                remaining_deck[0] = 74
+            elif "blue" in previous_player_2_or_4_check:
+                remaining_deck[0] = 75
+            for _ in range(4):
+                input_deck.append(remaining_deck[-1])
+                remaining_deck.pop()
 
     while True:
         try:
+            # checks to make sure a skip card has not been played
+            previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
+            if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
+                print(f"\nPrevious player skip card in effect. Skipping turn . . .")
+                if "red" in previous_player_skip_check:
+                    remaining_deck[0] = 64
+                elif "yellow" in previous_player_skip_check:
+                    remaining_deck[0] = 65
+                elif "green" in previous_player_skip_check:
+                    remaining_deck[0] = 66
+                elif "blue" in previous_player_skip_check:
+                    remaining_deck[0] = 67
+                # inactive skip ID's 64, 65, 66, 67
+                # active skip ID's 40, 43, 46, 49
+                # color order RYGB
+                break
+
             # prints the card information and action information for the player to make a decision
             print(f"\nCurrent Cards: {deck_reader(input_deck)}")
             print(f"Top Deck Card: {deck_reader([remaining_deck[0]])}")
@@ -238,11 +274,7 @@ def player_card_turn(input_deck, remaining_deck):
                                 # printing what card was played.
                                 if valid_card_placed == True:
                                     cards_played += 1
-                                    print(f"Card {[card_attribute_assigner(removed_card)]} played!")
-                                    if "+2" in attribute_card_player:
-                                        print(f"Next player gets +2 Cards")
-                                    elif "+4" in attribute_card_player:
-                                        print("Next player gets +4 cards")
+                                    print(f"\nCard {[card_attribute_assigner(removed_card)]} played!")
                                     break
                                 elif valid_card_placed == False:
                                     print("Cannot play this card.")
@@ -258,14 +290,17 @@ def player_card_turn(input_deck, remaining_deck):
 
                 # Logic behind if the player input is to draw a card
                 elif player_selection == 1:
-                    if cards_drawn < 1 and cards_played < 1:
-                        cards_drawn += 1
-                        input_deck.append(remaining_deck[-1])
-                        remaining_deck.pop()
-                        print("\nDrew a card!")
+                    if len(remaining_deck) > 4:
+                        if cards_drawn < 1 and cards_played < 1:
+                            cards_drawn += 1
+                            input_deck.append(remaining_deck[-1])
+                            remaining_deck.pop()
+                            print("\nDrew a card!")
+                        else:
+                            print("\nCannot draw a card. Too many actions")
+                            continue
                     else:
-                        print("\nCannot draw a card.")
-                        continue
+                        print("\nCannot draw a card. Not enough cards.")
 
                 # Logic behind if the player input is to end turn
                 elif player_selection == 2:
