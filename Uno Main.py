@@ -46,6 +46,8 @@ def deck_builder(global_player_deck, global_card_count):
         players_deck_temp.append(player_deck)
 
     # makes sure that the top card of the remaining deck would not be a wild or +2/+4/skip/reverse card.
+    # this is both practical and fun because it allows those cards to appear quicker in gameplay aswell as avoid
+    # any bugs on the first players turn
     while True:
         if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
             uno_deck_instance.append(uno_deck_instance[0])
@@ -65,33 +67,37 @@ def deck_builder(global_player_deck, global_card_count):
 
 
 # converts card number |ex: [10]| to attribute format |ex [yellow, 0]|
+# ID's were chosen because it made debugging easier. initially used purely string based approach
 def card_attribute_assigner(input_card):
     attributes = []
 
+    # in the case that any card was set to -1 as a result of an error
     if input_card < 0:
         attributes.append(f"Invalid {input_card}")
 
+    # assigns initial wild and color attributes
     if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 76, 77, 78, 79)):
         attributes.append("wild")
-    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72, 76):
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72, 76, 80):
         attributes.append("red")
-    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61, 65, 69, 73, 77):
+    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61, 65, 69, 73, 77, 81):
         attributes.append("yellow")
-    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62, 66, 70, 74, 78):
+    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62, 66, 70, 74, 78, 82):
         attributes.append("green")
-    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63, 67, 71, 75, 79):
+    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63, 67, 71, 75, 79, 83):
         attributes.append("blue")
 
+    # assigns special attributes
     if input_card in (40, 43, 46, 49, 64, 65, 66, 67):
         attributes.append("skip")
     if input_card in (41, 44, 47, 50):
         attributes.append("reverse")
-
     if input_card in (42, 45, 48, 51, 68, 69, 70, 71):
         attributes.append("+2")
     elif input_card in (54, 55, 60, 61, 62, 63, 72, 73, 74, 75, 76, 77, 78, 79):
         attributes.append("+4")
 
+    # assigns number attributes
     if (input_card in (0, 10, 20, 30)):
         attributes.append("0")
     elif (input_card in (1, 11, 21, 31)):
@@ -113,7 +119,8 @@ def card_attribute_assigner(input_card):
     elif (input_card in (9, 19, 29, 39)):
         attributes.append("9")
 
-    if input_card in (64, 65, 66, 67, 68, 72, 69, 73, 70, 74, 71, 75):
+    # assigns inactive attributes for a card ID that has been designated as already played
+    if input_card in (64, 65, 66, 67, 68, 72, 69, 73, 70, 74, 71, 75, 80, 81, 82, 83): # 76, 77, 78, 79 not included?
         attributes.append("inactive")
 
     return attributes
@@ -170,9 +177,21 @@ def player_card_turn(input_deck, remaining_deck):
     valid_card_placed = False
     deck_length = len(remaining_deck)
 
-    # If top card was a +2/+4, notify player and do appropriate logic
+    # if top card was a reverse card, update that card to be inactive (depending on color) with no other logic
+    previous_player_reverse_check = card_attribute_assigner(remaining_deck[0])
+    if "reverse" in previous_player_reverse_check:
+        if "red" in previous_player_reverse_check:
+            remaining_deck[0] = 80
+        if "yellow" in previous_player_reverse_check:
+            remaining_deck[0] = 81
+        if "green" in previous_player_reverse_check:
+            remaining_deck[0] = 82
+        if "blue" in previous_player_reverse_check:
+            remaining_deck[0] = 83
+
+    # If top card was a +2/+4, notify player, update card and do appropriate logic
     previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
-    if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
+    elif "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
         print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
 
         # sets card to an inactive version of it depending on the color
@@ -203,9 +222,9 @@ def player_card_turn(input_deck, remaining_deck):
             input_deck.append(remaining_deck[-1])
             remaining_deck.pop()
 
-    # checks to make sure a skip card has not been played, return output if it has.
+    # checks to make sure a skip card has not been played, set to inactive and return output.
     previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
-    if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
+    elif "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
         print(f"\nPrevious player skip card in effect. Skipping turn . . .")
 
         # sets card to an inactive version of it depending on the color
@@ -269,7 +288,7 @@ def player_card_turn(input_deck, remaining_deck):
                                                 if 0 <= wild_color_choice <= 4:
                                                     if wild_color_choice == 0:
 
-                                                    # update the stack and player deck
+                                                    # update the stack and player deck with an active card ID
                                                     # in the case of +4, only do this if there are enough cards
                                                         if "+4" in attribute_card_player:
                                                             if deck_length > 4:
@@ -279,7 +298,6 @@ def player_card_turn(input_deck, remaining_deck):
                                                             else:
                                                                 valid_card_placed = False
                                                         else:
-                                                        # 76, 77, 78, 79 +4
                                                             remaining_deck.insert(0, 56)
                                                             removed_card = 56
                                                             input_deck.pop(selected_card)
@@ -330,6 +348,9 @@ def player_card_turn(input_deck, remaining_deck):
                                                     input_deck.pop(selected_card)
                                                 else:
                                                     valid_card_placed = False
+
+                                            # if legal card played was a reverse card
+
 
                                             # if legal card played was any other card
                                             else:
