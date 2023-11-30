@@ -148,31 +148,32 @@ def win_condition_check(global_player_deck):
 def player_card_turn(input_deck, remaining_deck):
 
     # initializes a bunch of empty variables that will be used throughout the function.
-    remaining_deck_instance = remaining_deck
     cards_drawn = 0
     cards_played = 0
     attribute_card_player = -1
     attribute_card_deck = -1
     selected_card = -1
+    removed_card = -1
     valid_card_placed = False
     while True:
         try:
             # prints the card information and action information for the player to make a decision
             print("")
             print(f"Current Cards: {deck_reader(input_deck)}")
-            print(f"Top Deck Card: {deck_reader([remaining_deck_instance[0]])}")
+            print(f"Top Deck Card: {deck_reader([remaining_deck[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
 
             # controls the logic behind player input
             if (player_selection < 3 and player_selection > -1):
 
-#################################################### debug wall #######################################################
+############################################### temp debug wall ########################################################
 
                 # Logic behind if the player selects a card
                 if player_selection == 0:
                     if cards_played < 1:
                         while True:
                             try:
+
                                 # asks the user which card to select
                                 selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) or 0 to cancel | "))
                                 selected_card -= 1
@@ -181,7 +182,7 @@ def player_card_turn(input_deck, remaining_deck):
 
                                 # logic behind making sure the player's chosen card can be legally played
                                 attribute_card_player = card_attribute_assigner(input_deck[selected_card])
-                                attribute_card_deck = [(attribute_card_player[0])]
+                                attribute_card_deck = card_attribute_assigner(remaining_deck[0])
                                 for attribute in attribute_card_deck:
                                     if attribute in attribute_card_player:
                                         valid_card_placed = True
@@ -196,35 +197,38 @@ def player_card_turn(input_deck, remaining_deck):
                                                 wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
                                                 if 0 <= wild_color_choice <= 4:
                                                     if wild_color_choice == 0:
-                                                        remaining_deck_instance.insert(0, 56)
+                                                        remaining_deck.insert(0, 56)
+                                                        removed_card = 56
                                                         input_deck.pop(selected_card)
-                                                        break
                                                     elif wild_color_choice == 1:
-                                                        remaining_deck_instance.insert(0, 57)
+                                                        remaining_deck.insert(0, 57)
+                                                        removed_card = 57
                                                         input_deck.pop(selected_card)
-                                                        break
                                                     elif wild_color_choice == 2:
-                                                        remaining_deck_instance.insert(0, 58)
+                                                        remaining_deck.insert(0, 58)
+                                                        removed_card = 58
                                                         input_deck.pop(selected_card)
-                                                        break
                                                     elif wild_color_choice == 3:
-                                                        remaining_deck_instance.insert(0, 59)
+                                                        remaining_deck.insert(0, 59)
+                                                        removed_card = 59
                                                         input_deck.pop(selected_card)
-                                                        break
                                                 else:
                                                     print("Invalid input. Please enter a valid number.")
 
                                             # if the card was not wild, proceed without the normal updater
                                             else:
-                                                remaining_deck_instance.insert(0, input_deck[selected_card])
+                                                remaining_deck.insert(0, input_deck[selected_card])
+                                                removed_card = input_deck[selected_card]
                                                 input_deck.pop(selected_card)
+                                            break
                                         except ValueError:
                                             print("Invalid input. Please enter a valid number.")
 
                                 # printing what card was played.
                                 if valid_card_placed == True:
                                     cards_played += 1
-                                    print(f"Card {deck_reader([int(input_deck[int(selected_card)])])} played!")
+                                    print(f"Card {[card_attribute_assigner(removed_card)]} played!")
+                                    break
                                 elif valid_card_placed == False:
                                     print("Cannot play this card.")
                                     continue
@@ -243,8 +247,8 @@ def player_card_turn(input_deck, remaining_deck):
                 elif player_selection == 1:
                     if cards_drawn < 1 and cards_played < 1:
                         cards_drawn += 1
-                        input_deck.append(remaining_deck_instance[-1])
-                        remaining_deck_instance.pop()
+                        input_deck.append(remaining_deck[-1])
+                        remaining_deck.pop()
                         print("Drew a card!")
                     else:
                         print("Cannot draw a card.")
@@ -264,7 +268,7 @@ def player_card_turn(input_deck, remaining_deck):
             print("Invalid input. Please enter a number between 0 and 2.")
 
     # packaging outputs at the end of a player turn
-    output = [input_deck, remaining_deck_instance]
+    output = [input_deck, remaining_deck]
     return output
 
 def global_player_deck_updater(input_deck, global_player_deck, current_player_num):
