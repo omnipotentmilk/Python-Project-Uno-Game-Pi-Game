@@ -14,7 +14,7 @@ def game_initialize():
             card_count = int(input("Please enter the number of cards per player (1-55): "))
             if 1 <= player_count <= 55 and 1 <= card_count <= 56 and (player_count * card_count) + 1 <= 56:
 
-                # creates an important list which will essentially have surgery preformed on it later
+                # initialize an empty list, and return that list along with the player count
                 global_player_deck = list(range(player_count))
                 return [global_player_deck, card_count]
 
@@ -28,9 +28,9 @@ def game_initialize():
 
 
 
-# generates a valid uno deck, shuffles it, and properly distributes it to the players
-# afterwards, generates an output; index[0] being a nested list containing the player decks
-# index[1] being the remaining cards after distributing
+# generates a valid uno deck, shuffles it, properly distributes it to the players, packages outputs
+# output[0] being a nested list containing the player decks
+# output[1] being the remaining cards after distributing
 def deck_builder(global_player_deck, global_card_count):
 
     # generates the initial unsorted valid uno deck, shuffles it, and creates 2 empty lists for later use
@@ -39,14 +39,14 @@ def deck_builder(global_player_deck, global_card_count):
     players_deck_temp = []
     global_player_list_decks = []
 
-    # properly slices the main deck, adding a variable # of cards at a time to a temp deck
+    # properly slices the main deck, adding a variable num of cards at a time to a temp deck
     for _ in range(len(global_player_deck)):
         player_deck = uno_deck_instance[:global_card_count]
         uno_deck_instance = uno_deck_instance[global_card_count:]
         players_deck_temp.append(player_deck)
 
     # makes sure that the top card of the remaining deck would not be a wild or +2/+4/skip/reverse card.
-    # this is both practical and fun because it allows those cards to appear quicker in gameplay aswell as avoid
+    # this is both practical and fun because it allows those cards to appear quicker in gameplay as well as avoid
     # any bugs on the first players turn
     while True:
         if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
@@ -56,7 +56,7 @@ def deck_builder(global_player_deck, global_card_count):
         else:
             break
 
-    # Distribute the temporary new deck segments to the players (index's within global_player_deck)
+    # distribute the temporary new deck segments to the players (index's within global_player_deck)
     for i in global_player_deck:
         global_player_list_decks.append(players_deck_temp[i])
 
@@ -67,7 +67,7 @@ def deck_builder(global_player_deck, global_card_count):
 
 
 # converts card number |ex: [10]| to attribute format |ex [yellow, 0]|
-# ID's were chosen because it made debugging easier. initially used purely string based approach
+# IDs were chosen because it made debugging easier. initially used purely string based approach
 def card_attribute_assigner(input_card):
     attributes = []
 
@@ -130,6 +130,8 @@ def card_attribute_assigner(input_card):
 # easy way to read an entire deck of cards rather than an individual card.
 def deck_reader(input_deck):
     output = []
+
+    # per card in the input_deck, run it through the card_attribute_assigner
     for card in input_deck:
         card_attributes = card_attribute_assigner(card)
         output.append(card_attributes)
@@ -484,13 +486,20 @@ def game_loop(global_player_deck, remaining_deck):
     reverse_counter = 0  # Counter to track reverse turns
     prev_player = 0
 
-    # Debugging Tools to set the players deck to whatever you want
-    DEBUG_REVERSE_ADDER = global_player_deck[0]
-    DEBUG_REVERSE_ADDER[0] = 41
-    DEBUG_REVERSE_ADDER[1] = 44
-    DEBUG_REVERSE_ADDER[2] = 47
-    DEBUG_REVERSE_ADDER[3] = 50
-    global_player_deck[0] = DEBUG_REVERSE_ADDER
+    ###################
+    # Debugging Tools #
+    ###################
+
+    # DEBUG_REVERSE_ADDER = global_player_deck[0]
+    # DEBUG_REVERSE_ADDER[0] = 41
+    # DEBUG_REVERSE_ADDER[1] = 44
+    # DEBUG_REVERSE_ADDER[2] = 47
+    # DEBUG_REVERSE_ADDER[3] = 50
+    # global_player_deck[0] = DEBUG_REVERSE_ADDER
+
+    ###################
+    # Debugging Tools #
+    ###################
 
     # main turn loop
     while True:
@@ -505,19 +514,15 @@ def game_loop(global_player_deck, remaining_deck):
                 reverse_counter += 1
                 prev_player = current_player_num
 
-            # if reverse card counter is not divisible
+            # only continue if a reverse card is active
             if reverse_counter % 2 != 0:
 
                 # Reverse the turn order
                 current_player_num = (current_player_num - 1) % len(global_player_deck)
-                # Do not update prev_player here as the reverse flow is ongoing
-            else:
-                # Normal turn order
-                current_player_num += int(1)
 
-                # Wrap around to the first player if the end is reached
-                if current_player_num >= len(global_player_deck):
-                    current_player_num = 0
+            # else normal turn order
+            else:
+                current_player_num = (current_player_num + 1) % len(global_player_deck)
 
             # Breaks loop if a player has won
             if win_condition_check(global_player_deck) == False:
