@@ -451,15 +451,14 @@ def player_card_turn(input_deck, remaining_deck):
     output = [input_deck, remaining_deck]
     return output
 
-################################################ bad documentation line ################################################
-################ also unfinished line ##################################################################################
+#################################################################### debug line ########################################
 
 # holds the logic associated with deciding which players turn it is, and the order in which they are played
 def game_loop(global_player_deck, remaining_deck):
 
     # initialize variables for the function
     current_player_list = list(range(len(global_player_deck)))
-    print(f"CURRENT PLAYER LIST (check bottom of code){current_player_list}")
+    print(current_player_list)
     current_player_num = int(0)
     while True:
         try:
@@ -490,25 +489,26 @@ def game_loop(global_player_deck, remaining_deck):
             continue
     return
 
+########################################## debug line ##################################################################
 
-# Initialization Loop ; Calls necessary game logic/master functons and creates global variables
+# Initialization Loop ; Calls required game logic/master funcs and creates global variables to be used by those entities
 while True:
     try:
 
-        # Gets the initial global player list & card count.
+        # gets the initial global player list & card count via the game_initialize func
         initialize_output = game_initialize()
         global_card_count = initialize_output[1]
         global_player_deck = initialize_output[0]
 
 
-        # Calls upon the deck builder to get its output.
-        # output[0] will be the original global_player_deck with its indexes replaced by each player's deck list.
-        # output[1] will be the remaining cards from the deck player, which will act as the house deck.
+        # calls upon the deck builder to get its output
+        # output[0] will be a nested list of all player's decks
+        # output[1] will be the cards not in the player's decks (AKA the house deck)
         temp_deck_builder_output = deck_builder(global_player_deck, global_card_count)
         global_player_deck = temp_deck_builder_output[0]
         remaining_deck = temp_deck_builder_output[1]
 
-        # sends the seperated outputs to the master game_loop
+        # pushes those outputs to game. only returns once the game (AKA game loop) has ended.
         game_loop(global_player_deck, remaining_deck)
 
         # prompts the user to start another game. if value error quit.
