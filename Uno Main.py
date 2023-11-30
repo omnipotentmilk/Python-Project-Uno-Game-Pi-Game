@@ -9,13 +9,18 @@ def game_initialize():
     while True:
         try:
             player_count = int(input("Welcome to UnoPy! Please enter the player count (less than 8):  "))
-            if player_count > 7:
+            if 1 <= player_count <= 7:
+
+                # creates a bare bones list that will later hold the decks of every player in a single nested list
+                global_player_deck = list(range(player_count))
+                return global_player_deck
+
+            # handles the case that an impossible number of players is chosen
+            else:
                 player_count = 7
                 print("you don't have enough cards, changing player count to 7 . . .")
-
-            # creates a bare bones list that will later hold the decks of every player in a single nested list
-            global_player_deck = list(range(player_count))
-            return global_player_deck
+                global_player_deck = list(range(player_count))
+                return global_player_deck
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
@@ -161,6 +166,8 @@ def player_card_turn(input_deck, remaining_deck):
             # controls the logic behind player input
             if (player_selection < 3 and player_selection > -1):
 
+#################################################### debug wall #######################################################
+
                 # Logic behind if the player selects a card
                 if player_selection == 0:
                     if cards_played < 1:
@@ -179,41 +186,46 @@ def player_card_turn(input_deck, remaining_deck):
                                     if attribute in attribute_card_player:
                                         valid_card_placed = True
 
-                                # in the case that the card chosen was a wild cad
-                                if "wild" in attribute_card_player:
+                                # updates the deck and the player hand
+                                if valid_card_placed == True:
                                     while True:
                                         try:
-                                            wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
 
-                                            # changes the top deck card to match the associated card_attribute_assigner value
-                                            if 0 <= wild_color_choice <= 4:
-                                                if wild_color_choice == 0:
-                                                    remaining_deck_instance[0] = 56
-                                                    input_deck[selected_card] = 56
-                                                    break
-                                                elif wild_color_choice == 1:
-                                                    remaining_deck_instance[0] = 57
-                                                    input_deck[selected_card] = 57
-                                                    break
-                                                elif wild_color_choice == 2:
-                                                    remaining_deck_instance[0] = 58
-                                                    input_deck[selected_card] = 58
-                                                    break
-                                                elif wild_color_choice == 3:
-                                                    remaining_deck_instance[0] = 59
-                                                    input_deck[selected_card] = 59
-                                                    break
+                                            # first runs a special updater for if the card is wild
+                                            if "wild" in attribute_card_player:
+                                                wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
+                                                if 0 <= wild_color_choice <= 4:
+                                                    if wild_color_choice == 0:
+                                                        remaining_deck_instance.insert(0, 56)
+                                                        input_deck.pop(selected_card)
+                                                        break
+                                                    elif wild_color_choice == 1:
+                                                        remaining_deck_instance.insert(0, 57)
+                                                        input_deck.pop(selected_card)
+                                                        break
+                                                    elif wild_color_choice == 2:
+                                                        remaining_deck_instance.insert(0, 58)
+                                                        input_deck.pop(selected_card)
+                                                        break
+                                                    elif wild_color_choice == 3:
+                                                        remaining_deck_instance.insert(0, 59)
+                                                        input_deck.pop(selected_card)
+                                                        break
+                                                else:
+                                                    print("Invalid input. Please enter a valid number.")
+
+                                            # if the card was not wild, proceed without the normal updater
                                             else:
-                                                print("Invalid input. Please enter a valid number.")
+                                                remaining_deck_instance.insert(0, input_deck[selected_card])
+                                                input_deck.pop(selected_card)
                                         except ValueError:
-                                            print("Invalid input. Please enter a vaild number.")
+                                            print("Invalid input. Please enter a valid number.")
 
-                                # prints the card that was played.
+                                # printing what card was played.
                                 if valid_card_placed == True:
                                     cards_played += 1
                                     print(f"Card {deck_reader([int(input_deck[int(selected_card)])])} played!")
-                                    break
-                                else:
+                                elif valid_card_placed == False:
                                     print("Cannot play this card.")
                                     continue
 
@@ -225,6 +237,8 @@ def player_card_turn(input_deck, remaining_deck):
                         print("Cannot play another card.")
                         continue
 
+################################ temp debug wall ######################################################################
+
                 # Logic behind if a player draws a card
                 elif player_selection == 1:
                     if cards_drawn < 1 and cards_played < 1:
@@ -235,7 +249,6 @@ def player_card_turn(input_deck, remaining_deck):
                     else:
                         print("Cannot draw a card.")
                         continue
-                    break
 
                 # Logic behind if a player ends their turn
                 elif player_selection == 2:
@@ -251,10 +264,12 @@ def player_card_turn(input_deck, remaining_deck):
             print("Invalid input. Please enter a number between 0 and 2.")
 
     # packaging outputs at the end of a player turn
-    print("exited ur shit")
     output = [input_deck, remaining_deck_instance]
     return output
 
+def global_player_deck_updater(input_deck, global_player_deck, current_player_num):
+    global_player_deck[current_player_num] = input_deck
+    return input_deck
 
 
 # master function for the game logic (Calls most other functions and requires all previous variables)
@@ -262,15 +277,15 @@ def player_card_turn(input_deck, remaining_deck):
 def game_loop(global_player_deck, remaining_deck):
     current_player_list = list(range(len(global_player_deck)))
     current_player_num = int(0)
-
-    # while no player has won the game
     while True:
         try:
             # print game state
             print(f"Player {current_player_num + 1} Turn")
+
+            # calls the turn funciton, updates player and game deck.
             output = player_card_turn(global_player_deck[current_player_num], remaining_deck)
             remaining_deck = output[1]
-            # global_player_deck[# replace the index of the current player number with output[0]]
+            global_player_deck[current_player_num] = output[0]
 
             # controls turn flow
             current_player_num += int(1)
@@ -285,8 +300,8 @@ def game_loop(global_player_deck, remaining_deck):
                 print(f"Player {player_that_won} has won!")
                 break
         except IndexError:
-            print("exception caught")
-            break
+            current_player_num = 0
+            continue
     return
 
 
