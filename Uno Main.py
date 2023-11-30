@@ -8,26 +8,24 @@ import random
 def game_initialize():
     while True:
         try:
-            player_count = int(input("Welcome to UnoPy! Please enter the player count (less than 8):  "))
-            if 1 <= player_count <= 7:
+            player_count = int(input("Welcome to UnoPy! Please enter the player count (1-55): "))
+            card_count = int(input("Please enter the number of cards per player (1-55): "))
+            if 1 <= player_count <= 55 and 1 <= card_count <= 56 and (player_count * card_count) + 1 <= 56:
 
-                # creates a bare bones list that will later hold the decks of every player in a single nested list
+                # creates an important list which will essentially have surgery preformed on it later
                 global_player_deck = list(range(player_count))
-                return global_player_deck
+                return [global_player_deck, card_count]
 
-            # handles the case that an impossible number of players is chosen
+            # handles the case that an impossible number of players or cards is chosen
             else:
-                player_count = 7
-                print("you don't have enough cards, changing player count to 7 . . .")
-                global_player_deck = list(range(player_count))
-                return global_player_deck
+                print("\nImpossible player count/card count combination. Try again")
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
 
 
 # generates a valid uno deck, shuffles it, and properly distributes it to the players
-def deck_builder(global_player_deck):
+def deck_builder(global_player_deck, global_card_count):
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
     players_deck_temp = []
@@ -36,8 +34,8 @@ def deck_builder(global_player_deck):
     # properly slices the main deck, adding 7 cards at a time to as an index to a temp deck.
     # temp deck would look like this [[0, 1, 2, 3, 4, 5, 6, 7],[8, 9, 10, 11, 12, 13, 14]] except randomized
     for _ in range(len(global_player_deck)):
-        player_deck = uno_deck_instance[:3]
-        uno_deck_instance = uno_deck_instance[3:]
+        player_deck = uno_deck_instance[:global_card_count]
+        uno_deck_instance = uno_deck_instance[global_card_count:]
         players_deck_temp.append(player_deck)
 
     # makes sure that the top card of the remaining deck would not be a wild or +2/+4 card.
@@ -176,12 +174,10 @@ def player_card_turn(input_deck, remaining_deck):
             print(f"Top Deck Card: {deck_reader([remaining_deck[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
 
-            # controls the logic behind player input
+            # master if statement that makes sure a input corresponds to a valid action
             if (player_selection < 3 and player_selection > -1):
 
-############################################### temp debug wall ########################################################
-
-                # Logic behind if the player selects a card
+                # Logic behind if the player input is to select a card
                 if player_selection == 0:
                     if cards_played < 1:
                         while True:
@@ -260,9 +256,7 @@ def player_card_turn(input_deck, remaining_deck):
                         print("Cannot play another card.")
                         continue
 
-################################ temp debug wall ######################################################################
-
-                # Logic behind if a player draws a card
+                # Logic behind if the player input is to draw a card
                 elif player_selection == 1:
                     if cards_drawn < 1 and cards_played < 1:
                         cards_drawn += 1
@@ -273,13 +267,13 @@ def player_card_turn(input_deck, remaining_deck):
                         print("\nCannot draw a card.")
                         continue
 
-                # Logic behind if a player ends their turn
+                # Logic behind if the player input is to end turn
                 elif player_selection == 2:
                     if (cards_drawn > 0) or (cards_played > 0):
-                        print("Turn ending . . . ")
+                        print("\nTurn ending . . . ")
                         break
                     else:
-                        print("Cannot end turn.")
+                        print("\nCannot end turn.")
                         continue
 
         # Error handling for initial action choice
@@ -328,23 +322,31 @@ def game_loop(global_player_deck, remaining_deck):
     return
 
 
-# Loop for testing purposes only #
+# Initialization Loop ; Calls necessary game logic and creates global variables
 while True:
     try:
-        # creates the combined global player deck by calling deck builder function
-        global_player_deck = game_initialize()
-        combined_deck_temp = deck_builder(global_player_deck)
-        # splits the output of deck builder to get a global variable for player decks and for house deck
-        global_player_deck = combined_deck_temp[0]
-        remaining_deck = combined_deck_temp[1]
 
-        # Calls the main game loop func and provides all variables it needs
+        # Gets the initial global player list & card count.
+        initialize_output = game_initialize()
+        global_card_count = initialize_output[1]
+        global_player_deck = initialize_output[0]
+
+
+        # Calls upon the deck builder to get its output.
+        # output[0] will be the original global_player_deck with its indexes replaced by each player's deck list.
+        # output[1] will be the remaining cards from the deck player, which will act as the house deck.
+        temp_deck_builder_output = deck_builder(global_player_deck, global_card_count)
+        global_player_deck = temp_deck_builder_output[0]
+        remaining_deck = temp_deck_builder_output[1]
+
+        # sends the seperated outputs to the master game_loop
         game_loop(global_player_deck, remaining_deck)
 
-        # lets me quit while debugging
-        RAH = int(input("enter integer"))
+        # prompts the user to start another game. if value error quit.
+        quit = int(input("enter an integer to start another game."))
         continue
     except ValueError:
+        print("\nQuitting game . . .")
         break
 
 
