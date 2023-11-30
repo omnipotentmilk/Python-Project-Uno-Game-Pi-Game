@@ -4,27 +4,33 @@
 
 import random
 
-
-
-# function to prompt for the player/card count
+# function to prompt for the player/card count when starting a game
 def game_initialize():
+
+    # enters a while loop to account for error handling
     while True:
         try:
+
+            # prompts the host for the player and card count
             player_count = int(input("\nWelcome to UnoPy! Please enter the player count (1-infinity): "))
             card_count = int(input("Please enter the number of cards per player (1-infinity): "))
 
-            # initialize an empty list (each index will be a player), and return that list along with the card count so long
-            # as a valid number of players/cards was selected
+            # verifies that the input is greater than 0
             if player_count > 0 and card_count > 0:
+
+                # if it is,
                 global_player_deck = list(range(player_count))
                 return [global_player_deck, card_count]
+
+        # handles errors associated with player selection
             else:
                 print("Invalid input. Please enter a valid number")
                 continue
-
-        # handles if the player does not enter an integer
         except ValueError:
             print("Invalid input. Please enter an integer.")
+    global_player_deck = -1
+    card_count = -1
+    return [global_player_deck, card_count]
 
 
 
@@ -500,12 +506,8 @@ def player_card_turn(input_deck, remaining_deck):
                             print("\nCannot draw a card. Too many actions")
                             continue
                     else:
-                        print("\nCannot draw a card. Not enough cards. RIP. ")
-                        input_deck = [0]
-                        print(input_deck)
-                        remaining_deck = [0]
-                        print(remaining_deck)
-                        reverse_card_played = False
+                        print("\nCannot draw a card. Not enough cards. Ending game . . .")
+                        input_deck = []
                         output = [input_deck, remaining_deck, reverse_card_played]
                         return output
 
@@ -525,8 +527,6 @@ def player_card_turn(input_deck, remaining_deck):
     # packaging outputs at the end of a player turn as a result of manually ending turn
     output = [input_deck, remaining_deck, reverse_card_played]
     return output
-
-#################################################################### debug line ########################################
 
 # holds the logic associated with deciding which players turn it is, and the order in which they are played
 def game_loop(global_player_deck, remaining_deck):
@@ -557,8 +557,11 @@ def game_loop(global_player_deck, remaining_deck):
             # print game state
             print(f"\nPlayer {current_player_num + 1} Turn")
 
+            output = player_card_turn(global_player_deck[current_player_num], remaining_deck)
+            global_player_deck[current_player_num] = output[0]
+            remaining_deck = output[1]
             # check if the current player played a reverse card
-            if player_card_turn(global_player_deck[current_player_num], remaining_deck)[2]:
+            if output[2]:
 
                 # Increment reverse counter, save the PREVIOUS players position
                 reverse_counter += 1
@@ -587,12 +590,12 @@ def game_loop(global_player_deck, remaining_deck):
 
     return
 
-########################################## debug line ##################################################################
+
 
 # Initialization Loop ; Calls required game logic/master funcs and creates global variables to be used by those entities
 while True:
     try:
-
+        #
         # gets the initial global player list & card count via the game_initialize func
         initialize_output = game_initialize()
         global_card_count = initialize_output[1]
@@ -615,5 +618,3 @@ while True:
     except ValueError:
         print("\nQuitting game . . .")
         break
-
-
