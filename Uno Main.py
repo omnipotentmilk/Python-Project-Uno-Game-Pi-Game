@@ -76,7 +76,7 @@ def card_attribute_assigner(input_card):
         attributes.append(f"Invalid {input_card}")
 
     # assigns initial wild and color attributes
-    if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 76, 77, 78, 79)):
+    if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 76, 77, 78, 79, 72, 73, 74, 75)):
         attributes.append("wild")
     if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72, 76, 80):
         attributes.append("red")
@@ -479,40 +479,57 @@ def player_card_turn(input_deck, remaining_deck):
 # holds the logic associated with deciding which players turn it is, and the order in which they are played
 def game_loop(global_player_deck, remaining_deck):
 
-    # initialize variables for the function
+    # Initialize variables for the function
     current_player_num = int(0)
-    reverse_active = False # Alternatively, if divisible by 2 set to true, else false. this allows multiple reverse cards
-    # to be played
+    reverse_counter = 0  # Counter to track reverse turns
+    prev_player = 0
+
+    # Debugging Tools to set the players deck to whatever you want
+    DEBUG_REVERSE_ADDER = global_player_deck[0]
+    DEBUG_REVERSE_ADDER[0] = 41
+    DEBUG_REVERSE_ADDER[1] = 44
+    DEBUG_REVERSE_ADDER[2] = 47
+    DEBUG_REVERSE_ADDER[3] = 50
+    global_player_deck[0] = DEBUG_REVERSE_ADDER
+
+    # main turn loop
     while True:
         try:
-
             # print game state
             print(f"\nPlayer {current_player_num + 1} Turn")
 
-            # calls the turn funciton, updates player and game deck.
-            DEBUG_REVERSE_ADDER = global_player_deck[0]
-            DEBUG_REVERSE_ADDER[0] = 41
-            global_player_deck[0] = DEBUG_REVERSE_ADDER
+            # check if the current player played a reverse card
+            if player_card_turn(global_player_deck[current_player_num], remaining_deck)[2]:
 
-            output = player_card_turn(global_player_deck[current_player_num], remaining_deck)
-            print("reverse card debug", output[2])
-            remaining_deck = output[1]
-            global_player_deck[current_player_num] = output[0]
+                # Increment reverse counter, save the PREVIOUS players position
+                reverse_counter += 1
+                prev_player = current_player_num
 
-            # controls turn flow
-            current_player_num += int(1)
+            # if reverse card counter is not divisible
+            if reverse_counter % 2 != 0:
 
-            # breaks loop if a player has won
+                # Reverse the turn order
+                current_player_num = (current_player_num - 1) % len(global_player_deck)
+                # Do not update prev_player here as the reverse flow is ongoing
+            else:
+                # Normal turn order
+                current_player_num += int(1)
+
+                # Wrap around to the first player if the end is reached
+                if current_player_num >= len(global_player_deck):
+                    current_player_num = 0
+
+            # Breaks loop if a player has won
             if win_condition_check(global_player_deck) == False:
                 continue
             else:
                 player_that_won = win_condition_check(global_player_deck)
-
-                print(f"\nPlayer {player_that_won[1]+1} has won!")
+                print(f"\nPlayer {player_that_won[1] + 1} has won!")
                 break
         except IndexError:
             current_player_num = 0
             continue
+
     return
 
 ########################################## debug line ##################################################################
@@ -538,7 +555,7 @@ while True:
         game_loop(global_player_deck, remaining_deck)
 
         # prompts the user to start another game. if value error quit.
-        quit = int(input("\nenter an integer to start another game."))
+        quit = int(input("\nenter an integer to start another game"))
         continue
     except ValueError:
         print("\nQuitting game . . .")
