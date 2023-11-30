@@ -36,13 +36,12 @@ def deck_builder(global_player_deck):
     # properly slices the main deck, adding 7 cards at a time to as an index to a temp deck.
     # temp deck would look like this [[0, 1, 2, 3, 4, 5, 6, 7],[8, 9, 10, 11, 12, 13, 14]] except randomized
     for _ in range(len(global_player_deck)):
-        player_deck = uno_deck_instance[:7]
-        uno_deck_instance = uno_deck_instance[7:]
+        player_deck = uno_deck_instance[:3]
+        uno_deck_instance = uno_deck_instance[3:]
         players_deck_temp.append(player_deck)
 
-    # makes sure that the top card of the remaining deck would not be a wild card.
-    # if it is, send that card to the bottom of the remaining deck
-    if uno_deck_instance[0] in {55, 54, 53, 52}:
+    # makes sure that the top card of the remaining deck would not be a wild or +2/+4 card.
+    if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51}:
         uno_deck_instance.append(uno_deck_instance[0])
         uno_deck_instance.pop(0)
 
@@ -155,11 +154,25 @@ def player_card_turn(input_deck, remaining_deck):
     selected_card = -1
     removed_card = -1
     valid_card_placed = False
+    deck_length = len(remaining_deck)
+
+    # If top card was a +2 or +4, notify player and add to their deck.
+    previous_player_2_or_4 = card_attribute_assigner(remaining_deck[0])
+    if "+2" in previous_player_2_or_4:
+        print(f"\nPrevious player +2 card in effect. Cards Added:\n {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
+        for _ in range(2):
+            input_deck.append(remaining_deck[-1])
+            remaining_deck.pop()
+    elif "+4" in previous_player_2_or_4:
+        print(f"\nPrevious player +2 card in effect. Cards Added:\n {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
+        for _ in range(4):
+            input_deck.append(remaining_deck[-1])
+            remaining_deck.pop()
+
     while True:
         try:
             # prints the card information and action information for the player to make a decision
-            print("")
-            print(f"Current Cards: {deck_reader(input_deck)}")
+            print(f"\nCurrent Cards: {deck_reader(input_deck)}")
             print(f"Top Deck Card: {deck_reader([remaining_deck[0]])}")
             player_selection = int(input("0 to play a card | 1 to draw a card | 2 to end turn | "))
 
@@ -178,6 +191,7 @@ def player_card_turn(input_deck, remaining_deck):
                                 selected_card = int(input(f"Please select a card (1 - {len(input_deck)}) or 0 to cancel | "))
                                 selected_card -= 1
                                 if selected_card == -1:
+                                    print("\ncancelled card placement.")
                                     break
 
                                 # logic behind making sure the player's chosen card can be legally played
@@ -186,6 +200,8 @@ def player_card_turn(input_deck, remaining_deck):
                                 for attribute in attribute_card_deck:
                                     if attribute in attribute_card_player:
                                         valid_card_placed = True
+                                if "wild" in attribute_card_player:
+                                    valid_card_placed = True
 
                                 # updates the deck and the player hand
                                 if valid_card_placed == True:
@@ -214,7 +230,6 @@ def player_card_turn(input_deck, remaining_deck):
                                                         input_deck.pop(selected_card)
                                                 else:
                                                     print("Invalid input. Please enter a valid number.")
-
                                             # if the card was not wild, proceed without the normal updater
                                             else:
                                                 remaining_deck.insert(0, input_deck[selected_card])
@@ -228,6 +243,10 @@ def player_card_turn(input_deck, remaining_deck):
                                 if valid_card_placed == True:
                                     cards_played += 1
                                     print(f"Card {[card_attribute_assigner(removed_card)]} played!")
+                                    if "+2" in attribute_card_player:
+                                        print(f"Next player gets +2 Cards")
+                                    elif "+4" in attribute_card_player:
+                                        print("Next player gets +4 cards")
                                     break
                                 elif valid_card_placed == False:
                                     print("Cannot play this card.")
@@ -249,9 +268,9 @@ def player_card_turn(input_deck, remaining_deck):
                         cards_drawn += 1
                         input_deck.append(remaining_deck[-1])
                         remaining_deck.pop()
-                        print("Drew a card!")
+                        print("\nDrew a card!")
                     else:
-                        print("Cannot draw a card.")
+                        print("\nCannot draw a card.")
                         continue
 
                 # Logic behind if a player ends their turn
@@ -284,7 +303,7 @@ def game_loop(global_player_deck, remaining_deck):
     while True:
         try:
             # print game state
-            print(f"Player {current_player_num + 1} Turn")
+            print(f"\nPlayer {current_player_num + 1} Turn")
 
             # calls the turn funciton, updates player and game deck.
             output = player_card_turn(global_player_deck[current_player_num], remaining_deck)
