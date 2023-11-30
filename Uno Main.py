@@ -10,21 +10,21 @@ import random
 def game_initialize():
     while True:
         try:
-            player_count = int(input("\nWelcome to UnoPy! Please enter the player count (1-55): "))
-            card_count = int(input("Please enter the number of cards per player (1-55): "))
-            if 1 <= player_count <= 55 and 1 <= card_count <= 56 and (player_count * card_count) + 1 <= 56:
+            player_count = int(input("\nWelcome to UnoPy! Please enter the player count (1-infinity): "))
+            card_count = int(input("Please enter the number of cards per player (1-infinity): "))
 
-                # initialize an empty list, and return that list along with the player count
+            # initialize an empty list (each index will be a player), and return that list along with the card count so long
+            # as a valid number of players/cards was selected
+            if player_count > 0 and card_count > 0:
                 global_player_deck = list(range(player_count))
                 return [global_player_deck, card_count]
-
-            # handles the case that an impossible number of players or cards is chosen
             else:
-                print("\nImpossible player count/card count combination. Try again")
+                print("Invalid input. Please enter a valid number")
+                continue
 
         # handles if the player does not enter an integer
         except ValueError:
-            print("Invalid input. Please enter a valid number.")
+            print("Invalid input. Please enter an integer.")
 
 
 
@@ -33,13 +33,29 @@ def game_initialize():
 # output[1] being the remaining cards after distributing
 def deck_builder(global_player_deck, global_card_count):
 
-    # generates the initial unsorted valid uno deck, shuffles it, and creates 2 empty lists for later use
-    uno_deck_instance = list(range(56))
-    random.shuffle(uno_deck_instance)
+    # initialize variables for later use
     players_deck_temp = []
     global_player_list_decks = []
+    decks_generated = 0
 
-    # properly slices the main deck, adding a variable num of cards at a time to a temp deck
+    # Determine the total number of cards required
+    total_cards_needed = len(global_player_deck) * global_card_count
+
+    # Calculate the number of decks required. if its divisible by
+    if total_cards_needed % 56 == 0:
+        decks_required = total_cards_needed // 56
+    else:
+        decks_required = total_cards_needed // 56 + 1
+
+    # generated a single shuffled valid uno deck depending on the number of decks required
+    uno_deck_instance = []
+    for _ in range(decks_required):
+        decks_generated += 1
+        new_deck_instance = list(range(56))
+        random.shuffle(new_deck_instance)
+        uno_deck_instance.extend(new_deck_instance)
+
+    # properly slices the main deck to the players, depending on the card count specified
     for _ in range(len(global_player_deck)):
         player_deck = uno_deck_instance[:global_card_count]
         uno_deck_instance = uno_deck_instance[global_card_count:]
@@ -49,18 +65,45 @@ def deck_builder(global_player_deck, global_card_count):
     # this is both practical and fun because it allows those cards to appear quicker in gameplay as well as avoid
     # any bugs on the first players turn
     while True:
-        if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
-            uno_deck_instance.append(uno_deck_instance[0])
-            uno_deck_instance.pop(0)
+        try:
+            if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
+                uno_deck_instance.append(uno_deck_instance[0])
+                uno_deck_instance.pop(0)
+
+                # if the length of the deck was 1, appending and popping does nothing, so a new set of decks is required entirely.
+                if len(uno_deck_instance) == 1:
+
+                    # generated a single shuffled valid uno deck depending on the number of decks required
+                    uno_deck_instance = []
+                    for _ in range(decks_required):
+                        decks_generated += 1
+                        new_deck_instance = list(range(56))
+                        random.shuffle(new_deck_instance)
+                        uno_deck_instance.extend(new_deck_instance)
+
+                    # properly slices the main deck to the players, depending on the card count specified
+                    for _ in range(len(global_player_deck)):
+                        player_deck = uno_deck_instance[:global_card_count]
+                        uno_deck_instance = uno_deck_instance[global_card_count:]
+                        players_deck_temp.append(player_deck)
+                    continue
+                else:
+                    continue
+            else:
+                break
+        except IndexError:
+            decks_generated += 1
+            new_deck_instance = list(range(56))
+            random.shuffle(new_deck_instance)
+            uno_deck_instance.extend(new_deck_instance)
             continue
-        else:
-            break
 
     # distribute the temporary new deck segments to the players (index's within global_player_deck)
     for i in global_player_deck:
         global_player_list_decks.append(players_deck_temp[i])
 
     # packages and returns the nested player deck list and the remaining deck together for output
+    print(f"\nUsed [{decks_generated}] deck(s) in generation!\n[{len(uno_deck_instance)}] cards remain in the deck!\nIt took [{decks_generated*56}] card(s) in total to create this game!")
     output = [global_player_list_decks, uno_deck_instance]
     return output
 
@@ -394,7 +437,7 @@ def player_card_turn(input_deck, remaining_deck):
                 # Logic behind if the player input is to draw a card
                 elif player_selection == 1:
 
-                    # makes sure there is atleast 1 other card that can be drawn from the deck
+                    # makes sure there is at least 1 other card that can be drawn from the deck
                     if len(remaining_deck) > 1:
 
                         # if no cards have been drawn or placed, continue
@@ -457,7 +500,14 @@ def player_card_turn(input_deck, remaining_deck):
                             print("\nCannot draw a card. Too many actions")
                             continue
                     else:
-                        print("\nCannot draw a card. Not enough cards.")
+                        print("\nCannot draw a card. Not enough cards. RIP. ")
+                        input_deck = [0]
+                        print(input_deck)
+                        remaining_deck = [0]
+                        print(remaining_deck)
+                        reverse_card_played = False
+                        output = [input_deck, remaining_deck, reverse_card_played]
+                        return output
 
                 # Logic behind if the player input is to end turn
                 elif player_selection == 2:
