@@ -21,6 +21,8 @@ def game_initialize():
             # handles the case that an impossible number of players or cards is chosen
             else:
                 print("\nImpossible player count/card count combination. Try again")
+
+        # handles if the player does not enter an integer
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
@@ -30,13 +32,14 @@ def game_initialize():
 # afterwards, generates an output; index[0] being a nested list containing the player decks
 # index[1] being the remaining cards after distributing
 def deck_builder(global_player_deck, global_card_count):
+
+    # generates the initial unsorted valid uno deck, shuffles it, and creates 2 empty lists for later use
     uno_deck_instance = list(range(56))
     random.shuffle(uno_deck_instance)
     players_deck_temp = []
     global_player_list_decks = []
 
-    # properly slices the main deck, adding 7 cards at a time to as an index to a temp deck.
-    # temp deck would look like this [[0, 1, 2, 3, 4, 5, 6, 7],[8, 9, 10, 11, 12, 13, 14]] except randomized
+    # properly slices the main deck, adding a variable # of cards at a time to a temp deck
     for _ in range(len(global_player_deck)):
         player_deck = uno_deck_instance[:global_card_count]
         uno_deck_instance = uno_deck_instance[global_card_count:]
@@ -51,7 +54,7 @@ def deck_builder(global_player_deck, global_card_count):
         else:
             break
 
-    # Distribute the temporary new deck segments (which are 7 long) to the players in global_player_deck
+    # Distribute the temporary new deck segments to the players (index's within global_player_deck)
     for i in global_player_deck:
         global_player_list_decks.append(players_deck_temp[i])
 
@@ -62,21 +65,21 @@ def deck_builder(global_player_deck, global_card_count):
 
 
 # converts card number |ex: [10]| to attribute format |ex [yellow, 0]|
-def card_attribute_assigner(input_card): # Inputted in integer form
+def card_attribute_assigner(input_card):
     attributes = []
 
     if input_card < 0:
         attributes.append(f"Invalid {input_card}")
 
-    if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52)):
+    if (input_card in (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 76, 77, 78, 79)):
         attributes.append("wild")
-    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72):
+    if (0 <= input_card <= 9) or (40 <= input_card <= 42) or input_card in (56, 60, 64, 68, 72, 76):
         attributes.append("red")
-    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61, 65, 69, 73):
+    elif (10 <= input_card <= 19) or (43 <= input_card <= 45) or input_card in (57, 61, 65, 69, 73, 77):
         attributes.append("yellow")
-    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62, 66, 70, 74):
+    elif (20 <= input_card <= 29) or (46 <= input_card <= 48) or input_card in (58, 62, 66, 70, 74, 78):
         attributes.append("green")
-    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63, 67, 71, 75):
+    elif (30 <= input_card <= 39) or (49 <= input_card <= 51) or input_card in (59, 63, 67, 71, 75, 79):
         attributes.append("blue")
 
     if input_card in (40, 43, 46, 49, 64, 65, 66, 67):
@@ -86,7 +89,7 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
     if input_card in (42, 45, 48, 51, 68, 69, 70, 71):
         attributes.append("+2")
-    elif input_card in (54, 55, 60, 61, 62, 63, 72, 73, 74, 75):
+    elif input_card in (54, 55, 60, 61, 62, 63, 72, 73, 74, 75, 76, 77, 78, 79):
         attributes.append("+4")
 
     if (input_card in (0, 10, 20, 30)):
@@ -134,9 +137,9 @@ def win_condition_check(global_player_deck):
     # reads through each index of the nested global player list
     for player_deck in global_player_deck:
 
-        # if the nested list at index 1 has a length < 1, return that player's number because they are the winner
+        # if the nested list at index 0 has a length < 1, return that player's number because they are the winner
         if len(player_deck) < 1:
-            return True, player_tracker
+            return [True, player_tracker]
 
         # if not, increment player tracker to the next player
         else:
@@ -168,51 +171,56 @@ def player_card_turn(input_deck, remaining_deck):
     deck_length = len(remaining_deck)
 
     # If top card was a +2/+4, notify player and do appropriate logic
-    if len(remaining_deck) > 4: # ######################################## REMOVE NOT NEEDED ANYMORE ###################
-        previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
-        if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
-            print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
-            if "red" in previous_player_2_or_4_check:
-                remaining_deck[0] = 68
-            elif "yellow" in previous_player_2_or_4_check:
-                remaining_deck[0] = 69
-            elif "green" in previous_player_2_or_4_check:
-                remaining_deck[0] = 70
-            elif "blue" in previous_player_2_or_4_check:
-                remaining_deck[0] = 71
-            for _ in range(2):
-                input_deck.append(remaining_deck[-1])
-                remaining_deck.pop()
-        elif "+4" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
-            print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
-            if "red" in previous_player_2_or_4_check:
-                remaining_deck[0] = 72
-            elif "yellow" in previous_player_2_or_4_check:
-                remaining_deck[0] = 73
-            elif "green" in previous_player_2_or_4_check:
-                remaining_deck[0] = 74
-            elif "blue" in previous_player_2_or_4_check:
-                remaining_deck[0] = 75
-            for _ in range(4):
-                input_deck.append(remaining_deck[-1])
-                remaining_deck.pop()
+    previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
+    if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
+        print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
 
-        # checks to make sure a skip card has not been played, return output if it has.
-        previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
-        if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
-            print(f"\nPrevious player skip card in effect. Skipping turn . . .")
-            if "red" in previous_player_skip_check:
-                remaining_deck[0] = 64
-            elif "yellow" in previous_player_skip_check:
-                remaining_deck[0] = 65
-            elif "green" in previous_player_skip_check:
-                remaining_deck[0] = 66
-            elif "blue" in previous_player_skip_check:
-                remaining_deck[0] = 67
+        # sets card to an inactive version of it depending on the color
+        if "red" in previous_player_2_or_4_check:
+            remaining_deck[0] = 68
+        elif "yellow" in previous_player_2_or_4_check:
+            remaining_deck[0] = 69
+        elif "green" in previous_player_2_or_4_check:
+            remaining_deck[0] = 70
+        elif "blue" in previous_player_2_or_4_check:
+            remaining_deck[0] = 71
+        for _ in range(2):
+            input_deck.append(remaining_deck[-1])
+            remaining_deck.pop()
+    elif "+4" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
+        print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
 
-            # packaging outputs at the end of a player turn as a result of a skip
-            output = [input_deck, remaining_deck]
-            return output
+        # sets card to an inactive version of it depending on the color
+        if "red" in previous_player_2_or_4_check:
+            remaining_deck[0] = 72
+        elif "yellow" in previous_player_2_or_4_check:
+            remaining_deck[0] = 73
+        elif "green" in previous_player_2_or_4_check:
+            remaining_deck[0] = 74
+        elif "blue" in previous_player_2_or_4_check:
+            remaining_deck[0] = 75
+        for _ in range(4):
+            input_deck.append(remaining_deck[-1])
+            remaining_deck.pop()
+
+    # checks to make sure a skip card has not been played, return output if it has.
+    previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
+    if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
+        print(f"\nPrevious player skip card in effect. Skipping turn . . .")
+
+        # sets card to an inactive version of it depending on the color
+        if "red" in previous_player_skip_check:
+            remaining_deck[0] = 64
+        elif "yellow" in previous_player_skip_check:
+            remaining_deck[0] = 65
+        elif "green" in previous_player_skip_check:
+            remaining_deck[0] = 66
+        elif "blue" in previous_player_skip_check:
+            remaining_deck[0] = 67
+
+        # packaging outputs at the end of a player turn as a result of a skip
+        output = [input_deck, remaining_deck]
+        return output
 
     # player action logic begins here
     while True:
@@ -260,34 +268,63 @@ def player_card_turn(input_deck, remaining_deck):
                                                 wild_color_choice = int(input("wild card selection | 0 red | 1 yellow | 2 green | 3 blue | "))
                                                 if 0 <= wild_color_choice <= 4:
                                                     if wild_color_choice == 0:
-                                                        remaining_deck.insert(0, 56)
-                                                        removed_card = 56
-                                                        input_deck.pop(selected_card)
+
+                                                    # update the stack and player deck
+                                                    # in the case of +4, only do this if there are enough cards
+                                                        if "+4" in attribute_card_player:
+                                                            if deck_length > 4:
+                                                                remaining_deck.insert(0, 76)
+                                                                removed_card = 76
+                                                                input_deck.pop(selected_card)
+                                                            else:
+                                                                valid_card_placed = False
+                                                        else:
+                                                        # 76, 77, 78, 79 +4
+                                                            remaining_deck.insert(0, 56)
+                                                            removed_card = 56
+                                                            input_deck.pop(selected_card)
                                                     elif wild_color_choice == 1:
-                                                        remaining_deck.insert(0, 57)
-                                                        removed_card = 57
-                                                        input_deck.pop(selected_card)
+                                                        if "+4" in attribute_card_player:
+                                                            if deck_length > 4:
+                                                                remaining_deck.insert(0, 77)
+                                                                removed_card = 77
+                                                                input_deck.pop(selected_card)
+                                                            else:
+                                                                valid_card_placed = False
+                                                        else:
+                                                            remaining_deck.insert(0, 57)
+                                                            removed_card = 57
+                                                            input_deck.pop(selected_card)
                                                     elif wild_color_choice == 2:
-                                                        remaining_deck.insert(0, 58)
-                                                        removed_card = 58
-                                                        input_deck.pop(selected_card)
+                                                        if "+4" in attribute_card_player:
+                                                            if deck_length > 4:
+                                                                remaining_deck.insert(0, 78)
+                                                                removed_card = 78
+                                                                input_deck.pop(selected_card)
+                                                            else:
+                                                                valid_card_placed = False
+                                                        else:
+                                                            remaining_deck.insert(0, 58)
+                                                            removed_card = 58
+                                                            input_deck.pop(selected_card)
                                                     elif wild_color_choice == 3:
-                                                        remaining_deck.insert(0, 59)
-                                                        removed_card = 59
-                                                        input_deck.pop(selected_card)
+                                                        if "+4" in attribute_card_player:
+                                                            if deck_length > 4:
+                                                                remaining_deck.insert(0, 79)
+                                                                removed_card = 79
+                                                                input_deck.pop(selected_card)
+                                                            else:
+                                                                valid_card_placed = False
+                                                        else:
+                                                            remaining_deck.insert(0, 59)
+                                                            removed_card = 59
+                                                            input_deck.pop(selected_card)
                                                 else:
                                                     print("Invalid input. Please enter a valid number.")
 
-                                            # if legal card played was a +2/+4 card AND there are enough cards remaining
+                                            # if legal card played was a +2 card AND there are enough cards remaining
                                             elif "+2" in attribute_card_player:
                                                 if deck_length > 2:
-                                                    remaining_deck.insert(0, input_deck[selected_card])
-                                                    removed_card = input_deck[selected_card]
-                                                    input_deck.pop(selected_card)
-                                                else:
-                                                    valid_card_placed = False
-                                            elif "+4" in attribute_card_player:
-                                                if deck_length > 4:
                                                     remaining_deck.insert(0, input_deck[selected_card])
                                                     removed_card = input_deck[selected_card]
                                                     input_deck.pop(selected_card)
@@ -332,12 +369,65 @@ def player_card_turn(input_deck, remaining_deck):
                     # makes sure there is atleast 1 other card that can be drawn from the deck
                     if len(remaining_deck) > 1:
 
-                        # if no cards have been drawn or placed, draw a card. otherwise, continue back to selection
+                        # if no cards have been drawn or placed, continue
                         if cards_drawn < 1 and cards_played < 1:
-                            cards_drawn += 1
-                            input_deck.append(remaining_deck[-1])
-                            remaining_deck.pop()
-                            print("\nDrew a card!")
+
+                            # begins the checking logic to set an inactive card to an active version
+                            inactive_draw_card_checker = card_attribute_assigner(remaining_deck[-1])
+                            inactive_draw_card_checker.append("inactive")
+                            inactive_draw_card_checker.append("wild")
+                            print(inactive_draw_card_checker)
+                            if "inactive" in inactive_draw_card_checker:
+
+                            # changes ID depending on card type to an active version. at this point it no longer
+                            # matters if there are duplicate ID's since deck length is valid at creation
+                                if "wild" in inactive_draw_card_checker:
+                                    if "+4" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 55
+                                    else:
+                                        remaining_deck[-1] = 53
+                                elif "+2" in inactive_draw_card_checker:
+                                    if "red" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 42
+                                    elif "yellow" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 45
+                                    elif "green" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 48
+                                    elif "blue" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 51
+                                elif "skip" in inactive_draw_card_checker:
+                                    if "red" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 40
+                                    elif "yellow" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 43
+                                    elif "green" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 46
+                                    elif "blue" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 49
+                                elif "reverse" in inactive_draw_card_checker:
+                                    if "red" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 41
+                                    elif "yellow" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 44
+                                    elif "green" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 47
+                                    elif "blue" in inactive_draw_card_checker:
+                                        remaining_deck[-1] = 50
+                                    pass
+
+                            # after both special and normal cards have been handled, finish card draw logic
+                                cards_drawn += 1
+                                input_deck.append(remaining_deck[-1])
+                                remaining_deck.pop()
+                                print("\nDrew a card!")
+                            else:
+                                cards_drawn += 1
+                                input_deck.append(remaining_deck[-1])
+                                remaining_deck.pop()
+                                print("\nDrew a card!")
+
+                    # handles initial checks that made sure no card had already been drawn or placed
+                    # aswell as if the deck is not long enough
                         else:
                             print("\nCannot draw a card. Too many actions")
                             continue
@@ -362,10 +452,14 @@ def player_card_turn(input_deck, remaining_deck):
     return output
 
 ################################################ bad documentation line ################################################
+################ also unfinished line ##################################################################################
 
-# master function for the game logic (Calls most other functions and requires all previous variables)
+# holds the logic associated with deciding which players turn it is, and the order in which they are played
 def game_loop(global_player_deck, remaining_deck):
+
+    # initialize variables for the function
     current_player_list = list(range(len(global_player_deck)))
+    print(f"CURRENT PLAYER LIST (check bottom of code){current_player_list}")
     current_player_num = int(0)
     while True:
         try:
@@ -388,7 +482,8 @@ def game_loop(global_player_deck, remaining_deck):
                 continue
             else:
                 player_that_won = win_condition_check(global_player_deck)
-                print(f"Player {player_that_won} has won!")
+
+                print(f"\nPlayer {player_that_won[1]+1} has won!")
                 break
         except IndexError:
             current_player_num = 0
@@ -417,7 +512,7 @@ while True:
         game_loop(global_player_deck, remaining_deck)
 
         # prompts the user to start another game. if value error quit.
-        quit = int(input("enter an integer to start another game."))
+        quit = int(input("\nenter an integer to start another game."))
         continue
     except ValueError:
         print("\nQuitting game . . .")
