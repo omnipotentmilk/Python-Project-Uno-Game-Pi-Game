@@ -39,9 +39,13 @@ def deck_builder(global_player_deck, global_card_count):
         players_deck_temp.append(player_deck)
 
     # makes sure that the top card of the remaining deck would not be a wild or +2/+4/skip/reverse card.
-    if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
-        uno_deck_instance.append(uno_deck_instance[0])
-        uno_deck_instance.pop(0)
+    while True:
+        if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
+            uno_deck_instance.append(uno_deck_instance[0])
+            uno_deck_instance.pop(0)
+            continue
+        else:
+            break
 
     # Distribute the temporary new deck segments (which are 7 long) to the players in global_player_deck
     for i in global_player_deck:
@@ -73,14 +77,12 @@ def card_attribute_assigner(input_card): # Inputted in integer form
 
     if input_card in (40, 43, 46, 49, 64, 65, 66, 67):
         attributes.append("skip")
-    if input_card in (64, 65, 66, 67, 68, 72, 69, 73, 70, 74, 71, 75):
-        attributes.append("inactive")
     if input_card in (41, 44, 47, 50):
         attributes.append("reverse")
 
-    if input_card in (42, 45, 48, 51):
+    if input_card in (42, 45, 48, 51, 68, 69, 70, 71):
         attributes.append("+2")
-    elif input_card in (54, 55, 60, 61, 62, 63):
+    elif input_card in (54, 55, 60, 61, 62, 63, 72, 73, 74, 75):
         attributes.append("+4")
 
     if (input_card in (0, 10, 20, 30)):
@@ -103,6 +105,9 @@ def card_attribute_assigner(input_card): # Inputted in integer form
         attributes.append("8")
     elif (input_card in (9, 19, 29, 39)):
         attributes.append("9")
+
+    if input_card in (64, 65, 66, 67, 68, 72, 69, 73, 70, 74, 71, 75):
+        attributes.append("inactive")
 
     return attributes
 
@@ -156,10 +161,10 @@ def player_card_turn(input_deck, remaining_deck):
     valid_card_placed = False
     deck_length = len(remaining_deck)
 
-    # If top card was a +2 or +4, notify player and add to their deck (So long as there is enough cards in the deck)
+    # If top card was a +2/+4/skip, notify player and do appropriate logic
     if len(remaining_deck) > 4:
         previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
-        if "+2" in previous_player_2_or_4_check:
+        if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
             print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
             if "red" in previous_player_2_or_4_check:
                 remaining_deck[0] = 68
@@ -172,7 +177,7 @@ def player_card_turn(input_deck, remaining_deck):
             for _ in range(2):
                 input_deck.append(remaining_deck[-1])
                 remaining_deck.pop()
-        elif "+4" in previous_player_2_or_4_check:
+        elif "+4" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
             print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
             if "red" in previous_player_2_or_4_check:
                 remaining_deck[0] = 72
@@ -186,8 +191,10 @@ def player_card_turn(input_deck, remaining_deck):
                 input_deck.append(remaining_deck[-1])
                 remaining_deck.pop()
 
+    # player turn logic begins here
     while True:
         try:
+
             # checks to make sure a skip card has not been played
             previous_player_skip_check = card_attribute_assigner(remaining_deck[0])
             if "skip" in previous_player_skip_check and not "inactive" in previous_player_skip_check:
@@ -200,9 +207,8 @@ def player_card_turn(input_deck, remaining_deck):
                     remaining_deck[0] = 66
                 elif "blue" in previous_player_skip_check:
                     remaining_deck[0] = 67
-                # inactive skip ID's 64, 65, 66, 67
-                # active skip ID's 40, 43, 46, 49
-                # color order RYGB
+
+                # terminates player turn immediately if so.
                 break
 
             # prints the card information and action information for the player to make a decision
@@ -262,6 +268,7 @@ def player_card_turn(input_deck, remaining_deck):
                                                         input_deck.pop(selected_card)
                                                 else:
                                                     print("Invalid input. Please enter a valid number.")
+
                                             # if the card was not wild, proceed without the normal updater
                                             else:
                                                 remaining_deck.insert(0, input_deck[selected_card])
@@ -319,18 +326,16 @@ def player_card_turn(input_deck, remaining_deck):
     output = [input_deck, remaining_deck]
     return output
 
-def global_player_deck_updater(input_deck, global_player_deck, current_player_num):
-    global_player_deck[current_player_num] = input_deck
-    return input_deck
 
 
 # master function for the game logic (Calls most other functions and requires all previous variables)
-# is RESPONSIBLE FOR THE TURN LOGIC
+############## WILL BE RESPONSIBLE FOR THE TURN LOGIC / REVERSE CARD LOGIC ############################
 def game_loop(global_player_deck, remaining_deck):
     current_player_list = list(range(len(global_player_deck)))
     current_player_num = int(0)
     while True:
         try:
+
             # print game state
             print(f"\nPlayer {current_player_num + 1} Turn")
 
@@ -357,7 +362,7 @@ def game_loop(global_player_deck, remaining_deck):
     return
 
 
-# Initialization Loop ; Calls necessary game logic and creates global variables
+# Initialization Loop ; Calls necessary game logic/master functons and creates global variables
 while True:
     try:
 
