@@ -59,30 +59,48 @@ def deck_builder(global_player_deck, global_card_count):
     else:
         decks_required = total_cards_needed // 56 + 1
 
-    # generated a single shuffled valid uno deck depending on the number of decks required
+    # first create an empty list which will act as the "house". This deck is important because
+    # it is outputted at the end of the function, as it represents the remaining cards in the stack
     uno_deck_instance = []
+
+    # creates as many deck as calculated to be required, each time updating the deck creation counter.
+    # the range (number of cards) of this deck is 56 because there are 56 unique cards per uno deck
+    # each deck is shuffled, and then added to the house deck.
     for _ in range(decks_required):
         decks_generated += 1
         new_deck_instance = list(range(56))
         random.shuffle(new_deck_instance)
         uno_deck_instance.extend(new_deck_instance)
 
-    # properly slices the main deck to the players, depending on the card count specified
+
+    # iterates a number of times equal to the number of players in the game
     for _ in range(len(global_player_deck)):
+
+        # slices the list from the start [0] to desired # of cards [ex 1] exclusive of the last index
+        # this means it will slice [0] if the card count was 1, and [0, 1] if the card count was 2
         player_deck = uno_deck_instance[:global_card_count]
+
+        # sets the house deck to itself, starting at the card count (inclusive) to the end
         uno_deck_instance = uno_deck_instance[global_card_count:]
+
+        # appends the cards sliced from the house to a temporary player deck
+        #[[the cards will be added as a seperate index per player],[just like this]]
         players_deck_temp.append(player_deck)
 
     # makes sure that the top card of the remaining deck would not be a wild or +2/+4/skip/reverse card.
     # this is both practical and fun because it allows those cards to appear quicker in gameplay as well as avoid
     # any bugs on the first players turn
+
+    # enters error handling loop
     while True:
         try:
+            # These ID's correspond to Wild Cards, Reverse Cards, +2/+4 Cards, and Skip Cards.
             if uno_deck_instance[0] in {55, 54, 53, 52, 42, 45, 48, 51, 40, 43, 46, 49, 41, 44, 47, 50}:
                 uno_deck_instance.append(uno_deck_instance[0])
-                uno_deck_instance.pop(0)
+                uno_deck_instance.pop(0) # append the issue card to the back and remove where it used to be
 
-                # if the length of the deck was 1, appending and popping does nothing, so a new set of decks is required entirely.
+                # if the length of the deck was 1, appending and popping does nothing
+                # A new set of decks is required entirely (uses the same method as earlier)
                 if len(uno_deck_instance) == 1:
 
                     # generated a single shuffled valid uno deck depending on the number of decks required
@@ -101,6 +119,8 @@ def deck_builder(global_player_deck, global_card_count):
                     continue
                 else:
                     continue
+
+            # in the case that the top card was not flagged as an issue
             else:
                 break
         except IndexError:
@@ -247,7 +267,7 @@ def player_card_turn(input_deck, remaining_deck):
         if "blue" in previous_player_reverse_check:
             remaining_deck[0] = 83
 
-    # If top card was a +2/+4, notify player, update card and do appropriate logic
+    # If top card was a +2 notify player, update card and do appropriate logic
     previous_player_2_or_4_check = card_attribute_assigner(remaining_deck[0])
     if "+2" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
         print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 2:][::-1])}")
@@ -264,6 +284,8 @@ def player_card_turn(input_deck, remaining_deck):
         for _ in range(2):
             input_deck.append(remaining_deck[-1])
             remaining_deck.pop()
+
+    # If top card was a +4 notify player, update card and do appropriate logic
     if "+4" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
         print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
 
@@ -525,6 +547,8 @@ def player_card_turn(input_deck, remaining_deck):
                     else:
                         print("\nCannot end turn.")
                         continue
+            else:
+                print("Invalid choice. Please enter a valid action")
 
         # Error handling for initial action choice
         except ValueError:
@@ -537,9 +561,9 @@ def player_card_turn(input_deck, remaining_deck):
 # holds the logic associated with deciding which players turn it is, and the order in which they are played
 def game_loop(global_player_deck, remaining_deck):
 
-    # Initialize variables for the function
+    # Initialize variables for the function. Everything starts at 0 because player 1 goes first!
     current_player_num = int(0)
-    reverse_counter = 0  # Counter to track reverse turns
+    reverse_counter = 0
     prev_player = 0
 
     ###################
@@ -563,13 +587,18 @@ def game_loop(global_player_deck, remaining_deck):
             # print game state
             print(f"\nPlayer {current_player_num + 1} Turn")
 
+            # Call a function that holds logic with player input
+            # the first TWO i/o of this function is the player's deck and house deck after their turn
+            # the third output is in the special case that a reverse card has been played
             output = player_card_turn(global_player_deck[current_player_num], remaining_deck)
             global_player_deck[current_player_num] = output[0]
             remaining_deck = output[1]
+
             # check if the current player played a reverse card
             if output[2]:
 
                 # Increment reverse counter, save the PREVIOUS players position
+                # Why? So when you play a reverse card you don't go twice
                 reverse_counter += 1
                 prev_player = current_player_num
 
@@ -601,7 +630,7 @@ def game_loop(global_player_deck, remaining_deck):
 # Initialization Loop ; Calls required game logic/master funcs and creates global variables to be used by those entities
 while True:
     try:
-        #
+
         # gets the initial global player list & card count via the game_initialize func
         initialize_output = game_initialize()
         global_card_count = initialize_output[1]
