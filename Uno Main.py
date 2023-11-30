@@ -287,7 +287,7 @@ def player_card_turn(input_deck, remaining_deck):
 
     # If top card was a +4 notify player, update card and do appropriate logic
     if "+4" in previous_player_2_or_4_check and not "inactive" in previous_player_2_or_4_check:
-        print(f"\nPrevious player +2 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
+        print(f"\nPrevious player +4 card in effect.\nCards added: {deck_reader(remaining_deck[deck_length - 4:][::-1])}")
 
         # sets card to an inactive version of it depending on the color
         if "red" in previous_player_2_or_4_check:
@@ -360,6 +360,7 @@ def player_card_turn(input_deck, remaining_deck):
                                 # if card COULD be legally placed, continue to further logic
                                 if valid_card_placed == True:
                                     while True:
+
                                         try:
 
                                             # if legal card played was a wild card
